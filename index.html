@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cenik kalkulator</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { margin: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react" data-type="module">
+const { useState } = React;
+
+function Check({ size = 16, style, className }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+function Minus({ size = 16, style, className }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+function Plus({ size = 16, style, className }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+function Ticket({ size = 16, style, className }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+      <path d="M13 5v2" />
+      <path d="M13 17v2" />
+      <path d="M13 11v2" />
+    </svg>
+  );
+}
+function Receipt({ size = 16, style, className }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+      <path d="M8 7h8" />
+      <path d="M8 11h8" />
+      <path d="M8 15h5" />
+    </svg>
+  );
+}
+function ChevronDown({ size = 16, style, className }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style} className={className}>
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
+
+const INK = "#1B2A41";
+const INK_SOFT = "#5B6573";
+const PAPER = "#F2EEE3";
+const PANEL = "#FBF9F3";
+const BRASS = "#A9792C";
+const BRASS_DARK = "#7E5C1F";
+const TEAL = "#2F6B5E";
+const HAIR = "#DAD3C2";
+
+const PACKAGES = [
+  { key: "reality", name: "Reality", basePrice: 245, fullAddon: 345, desc: "Realitní převody, nájmy, hypotéky" },
+  { key: "hr", name: "HR", basePrice: 245, fullAddon: 345, desc: "Pracovní smlouvy, interní dokumenty" },
+  { key: "korporat", name: "Korporát", basePrice: 345, fullAddon: 445, desc: "Valné hromady, statutární dokumenty" },
+];
+
+const UTILITY_PRICE = 295;
+const ONBOARDING_MULTIPLIER = 10;
+
+const FREE_LIMITS = [
+  { label: "Podpis dokumentu (PES)", limit: "3 / měsíc", note: "Vlastní mechanismus, bez externího nákladu" },
+  { label: "AML prohlášení + vyhodnocení", limit: "3 / měsíc", note: "Vlastní logika, bez externího volání" },
+  { label: "Prověření osoby — základní screening", limit: "3 / měsíc", note: "Volně dostupné zdroje" },
+  { label: "Dokument ze šablony", limit: "2 / měsíc", note: "Bez archivace a auditní stopy" },
+];
+
+const WHITELABEL_TIERS = [
+  { key: "none", name: "Žádný", desc: "Standardní vzhled platformy.", price: 0 },
+  { key: "basic", name: "Basic whitelabel", desc: "Brandujeme jen část — odkaz na nás zůstává zachován (např. doména nebo patička).", price: 490 },
+  { key: "full", name: "Full brand", desc: "Brandujeme vše, po nás není ani zmínka — vlastní doména klienta na naší dedikované infrastruktuře. Vyžaduje Privátní cloud.", price: 2990 },
+];
+
+const ADDONS = [
+  { key: "sso", name: "Jednotné přihlášení (SSO)", desc: "Lidé se přihlašují firemním účtem (Azure AD, Google Workspace) — bez samostatného hesla do appky.", price: 990 },
+  { key: "privatecloud", name: "Privátní cloud", desc: "Dedikovaná instance na naší infrastruktuře — oddělená od ostatních klientů, vlastní doména, úložiště bez objemového limitu v ceně.", price: 5990 },
+  { key: "api", name: "API přístup", desc: "Napojení appky na vaše systémy — data a dokumenty proudí automaticky, bez ručního přepisování.", price: 990 },
+];
+
+const INCLUDED = [
+  "Prostý elektronický podpis (PES)",
+  "AML prohlášení",
+  "AML vyhodnocení",
+  "Manuální identifikace osoby (opis dokladu)",
+  "Základní screening osoby (volně dostupné zdroje)",
+  "Správa zakázek",
+  "Kalendářové události / hlídání lhůt",
+  "Automatické zplnomocnění přílohou",
+  "Sdílené úložiště dokumentů (do 10 GB na firmu)",
+  "Auditní stopa a přístup k archivovaným dokumentům",
+];
+
+const CREDIT_ITEMS = [
+  { name: "Zaručený elektronický podpis (ZEP)", price: "39 Kč" },
+  { name: "Kvalifikovaný elektronický podpis (KEP)", price: "89 Kč" },
+  { name: "Ověření totožnosti přes BankID", price: "49 Kč" },
+  { name: "PEP / sankční kontrola — mezinárodní", price: "19 Kč" },
+  { name: "PEP / sankční kontrola — ČR", price: "22 Kč" },
+  { name: "Exekuční kontrola ČR", price: "49 Kč" },
+  { name: "Exekuční kontrola SK", price: "79 Kč" },
+  { name: "Insolvenční kontrola", price: "5 Kč" },
+  { name: "Ztracený / odcizený doklad", price: "5 Kč" },
+  { name: "Katastr nemovitostí — list vlastnictví (LV)", price: "100 Kč" },
+  { name: "AI asistent (generování / review dokumentu)", price: "1 Kč / 1 000 tokenů" },
+  { name: "Archivace dokumentu — časové razítko + certifikát (jednorázově při uložení)", price: "4 Kč / dokument" },
+  { name: "Obnova archivní platnosti — re-timestamping před expirací certifikátu (automaticky, ročně)", price: "1 Kč / dokument / rok" },
+  { name: "Navýšení úložiště nad 10 GB", price: "79 Kč / 50 GB / měs" },
+];
+
+const SUPPORT_TIERS = [
+  { key: "standard", name: "Standard", desc: "E-mail podpora v pracovní době.", price: 0 },
+  { key: "plus", name: "Plus", desc: "Živý chat v aplikaci + e-mail, odpověď do 4 hodin.", price: 990 },
+  { key: "premium", name: "Premium", desc: "Telefonická linka + chat + e-mail + 1 h konzultace měsíčně.", price: 2990 },
+];
+
+const COMPARE_ROWS = [
+  { category: "Přístup", rows: [
+    { label: "Lehký přístup (podpis, základní AML)", free: true, light: true, reality: true, hr: true, korporat: true },
+    { label: "Základní sada dokumentů od advokátů", free: false, light: false, reality: true, hr: true, korporat: true },
+    { label: "Rozšířená sada dokumentů (Full)", free: false, light: false, reality: "příplatek", hr: "příplatek", korporat: "příplatek" },
+    { label: "Garantovaná aktualizace šablon", free: false, light: false, reality: true, hr: true, korporat: true },
+  ]},
+  { category: "Funkce v plánu", rows: [
+    { label: "Prostý el. podpis (PES)", free: "3 / měs", light: true, reality: true, hr: true, korporat: true },
+    { label: "AML prohlášení + vyhodnocení", free: "3 / měs", light: true, reality: true, hr: true, korporat: true },
+    { label: "Identifikace osoby (manuální)", free: false, light: true, reality: true, hr: true, korporat: true },
+    { label: "Základní screening osoby", free: "3 / měs", light: true, reality: true, hr: true, korporat: true },
+    { label: "Správa zakázek", free: false, light: true, reality: true, hr: true, korporat: true },
+    { label: "Kalendář / hlídání lhůt", free: false, light: true, reality: true, hr: true, korporat: true },
+    { label: "Automatické zplnomocnění přílohou", free: false, light: true, reality: true, hr: true, korporat: true },
+    { label: "Auditní stopa a archiv dokumentů", free: false, light: true, reality: true, hr: true, korporat: true },
+  ]},
+  { category: "Dokumenty ze šablon", rows: [
+    { label: "Dokumenty ze šablony", free: "2 / měs", light: true, reality: true, hr: true, korporat: true },
+    { label: "Archivace dokumentu (s razítkem)", free: false, light: true, reality: true, hr: true, korporat: true },
+  ]},
+  { category: "Úložiště", rows: [
+    { label: "Sdílené úložiště", free: false, light: "10 GB", reality: "10 GB", hr: "10 GB", korporat: "10 GB" },
+    { label: "Navýšení úložiště (kredit)", free: false, light: true, reality: true, hr: true, korporat: true },
+  ]},
+  { category: "Kredit — prémiové funkce", rows: [
+    { label: "ZEP / KEP podpis", free: false, light: true, reality: true, hr: true, korporat: true },
+    { label: "BankID identifikace", free: false, light: true, reality: true, hr: true, korporat: true },
+    { label: "Exekuce, insolvence, PEP/sankce", free: false, light: true, reality: true, hr: true, korporat: true },
+    { label: "Katastr nemovitostí (LV)", free: false, light: false, reality: true, hr: false, korporat: false },
+    { label: "AI asistent (generování / review)", free: false, light: true, reality: true, hr: true, korporat: true },
+    { label: "Archivace s razítkem (10 let)", free: false, light: true, reality: true, hr: true, korporat: true },
+  ]},
+];
+
+const CREDIT_CALC = [
+  { key: "zep", label: "Zaručený el. podpis (ZEP)", unit: "podpis", price: 39 },
+  { key: "kep", label: "Kvalifikovaný el. podpis (KEP)", unit: "podpis", price: 89 },
+  { key: "bankid", label: "Ověření totožnosti přes BankID", unit: "ověření", price: 49 },
+  { key: "pep_int", label: "PEP / sankce — mezinárodní", unit: "kontrola", price: 19 },
+  { key: "pep_cz", label: "PEP / sankce — ČR", unit: "kontrola", price: 22 },
+  { key: "exekuce_cz", label: "Exekuční kontrola ČR", unit: "kontrola", price: 49 },
+  { key: "exekuce_sk", label: "Exekuční kontrola SK", unit: "kontrola", price: 79 },
+  { key: "insolvence", label: "Insolvenční kontrola", unit: "kontrola", price: 5 },
+  { key: "doklad", label: "Ztracený / odcizený doklad", unit: "kontrola", price: 5 },
+  { key: "lv", label: "Katastr — list vlastnictví (LV)", unit: "výpis", price: 100 },
+  { key: "ai", label: "AI asistent", unit: "1 000 tokenů", price: 1 },
+  { key: "archivace", label: "Archivace dokumentu", unit: "dokument", price: 4 },
+  { key: "retimestamp", label: "Obnova archivní platnosti (ročně)", unit: "dokument", price: 1 },
+  { key: "storage", label: "Navýšení úložiště (50 GB bloky)", unit: "blok / měs", price: 79 },
+];
+
+const TOPUP_TIERS = [
+  { pay: 2000, get: 2000 },
+  { pay: 5000, get: Math.round(5000 * 1.05) },
+  { pay: 15000, get: Math.round(15000 * 1.10) },
+  { pay: 35000, get: Math.round(35000 * 1.15) },
+];
+
+const kc = (n) => Math.round(n).toLocaleString("cs-CZ") + " Kč";
+
+function Stepper({ value, onChange, label }) {
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        aria-label={`Snížit ${label}`}
+        onClick={() => onChange(Math.max(0, value - 1))}
+        className="w-7 h-7 rounded-full flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2"
+        style={{ border: `1.5px solid ${HAIR}`, color: INK, ["--tw-ring-color"]: BRASS }}
+      >
+        <Minus size={14} />
+      </button>
+      <span className="font-num w-7 text-center text-sm" style={{ color: INK }}>
+        {value}
+      </span>
+      <button
+        type="button"
+        aria-label={`Zvýšit ${label}`}
+        onClick={() => onChange(Math.min(50, value + 1))}
+        className="w-7 h-7 rounded-full flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2"
+        style={{ border: `1.5px solid ${HAIR}`, color: INK, ["--tw-ring-color"]: BRASS }}
+      >
+        <Plus size={14} />
+      </button>
+    </div>
+  );
+}
+
+function Tile({ active, onClick, name, desc, price, accent = TEAL }) {
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={active}
+      onClick={onClick}
+      className="text-left px-3 py-2 rounded-md transition-all focus:outline-none focus-visible:ring-2"
+      style={{
+        border: `1.5px solid ${active ? accent : HAIR}`,
+        background: active ? `${accent}14` : "transparent",
+        ["--tw-ring-color"]: accent,
+      }}
+    >
+      <p className="text-sm">{name}</p>
+      <p className="text-xs mt-0.5" style={{ color: INK_SOFT }}>
+        {desc}
+      </p>
+      <p className="font-num text-xs mt-1" style={{ color: INK_SOFT }}>
+        {price}
+      </p>
+    </button>
+  );
+}
+
+function PricingCalculator() {
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [seats, setSeats] = useState({ reality: 0, hr: 0, korporat: 0 });
+  const [fullPkg, setFullPkg] = useState({ reality: false, hr: false, korporat: false });
+  const [whitelabel, setWhitelabel] = useState("none");
+  const [addons, setAddons] = useState({ sso: false, privatecloud: false, api: false });
+  const [annual, setAnnual] = useState(false);
+  const [topUpIdx, setTopUpIdx] = useState(0);
+  const [support, setSupport] = useState("standard");
+  const [volumes, setVolumes] = useState(
+    Object.fromEntries(CREDIT_CALC.map((c) => [c.key, 0]))
+  );
+  const [enterpriseOpen, setEnterpriseOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [tab, setTab] = useState("config");
+
+  const setTotal = (v) => {
+    const newTotal = Math.max(0, v);
+    setTotalUsers(newTotal);
+    setSeats((s) => {
+      const next = {};
+      for (const p of PACKAGES) next[p.key] = Math.min(s[p.key] || 0, newTotal);
+      return next;
+    });
+  };
+
+  const packagesMonthly = PACKAGES.reduce((s, p) => {
+    const pricePerSeat = p.basePrice + (fullPkg[p.key] ? p.fullAddon : 0);
+    return s + (seats[p.key] || 0) * pricePerSeat;
+  }, 0);
+  const utilityMonthly = totalUsers * UTILITY_PRICE;
+  const whitelabelMonthly = WHITELABEL_TIERS.find((t) => t.key === whitelabel).price;
+  const addonsMonthly = ADDONS.reduce((s, a) => s + (addons[a.key] ? a.price : 0), 0);
+  const supportMonthly = SUPPORT_TIERS.find((t) => t.key === support).price;
+  const anyEnterpriseActive = whitelabel !== "none" || Object.values(addons).some(Boolean);
+
+  const monthlyTotal = packagesMonthly + utilityMonthly + whitelabelMonthly + addonsMonthly + supportMonthly;
+  const onboarding = (packagesMonthly + utilityMonthly) * ONBOARDING_MULTIPLIER;
+
+  const annualPay = monthlyTotal * 10;
+  const annualSavings = monthlyTotal * 2;
+
+  const tier = TOPUP_TIERS[topUpIdx];
+  const bonusPct = Math.round(((tier.get - tier.pay) / tier.pay) * 100);
+
+  const lineItems = [
+    { label: `Lehký přístup × ${totalUsers}`, value: utilityMonthly },
+    ...PACKAGES.filter((p) => seats[p.key] > 0).map((p) => {
+      const pricePerSeat = p.basePrice + (fullPkg[p.key] ? p.fullAddon : 0);
+      const label = `${p.name} ${fullPkg[p.key] ? "Full" : "Základ"} × ${seats[p.key]} ${seats[p.key] === 1 ? "uživatel" : "uživatelů"}`;
+      return { label, value: seats[p.key] * pricePerSeat };
+    }),
+    ...(whitelabelMonthly > 0
+      ? [{ label: `Whitelabel — ${WHITELABEL_TIERS.find((t) => t.key === whitelabel).name}`, value: whitelabelMonthly }]
+      : []),
+    ...ADDONS.filter((a) => addons[a.key]).map((a) => ({ label: a.name, value: a.price })),
+    ...(supportMonthly > 0
+      ? [{ label: `Podpora — ${SUPPORT_TIERS.find((t) => t.key === support).name}`, value: supportMonthly }]
+      : []),
+  ];
+
+  return (
+    <div className="font-body min-h-screen" style={{ background: PAPER, color: INK }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,680&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+        .font-display { font-family: 'Fraunces', serif; }
+        .font-body { font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+        .font-num { font-family: 'IBM Plex Mono', monospace; font-feature-settings: "tnum"; }
+      `}</style>
+
+      <header className="px-6 sm:px-10 py-12" style={{ background: INK }}>
+        <div className="max-w-5xl mx-auto">
+          <p className="font-num text-xs uppercase tracking-widest mb-3" style={{ color: BRASS }}>
+            Kalkulátor ceny — pracovní návrh
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl leading-tight" style={{ color: PAPER }}>
+            Postavte si vlastní smlouvu.
+          </h1>
+          <p className="mt-3 max-w-xl text-sm" style={{ color: "#C9CDD6" }}>
+            Vyberte balíčky, uživatele a rozšíření — souhrn vpravo se chová jako návrh smlouvy
+            a počítá se v reálném čase.
+          </p>
+          <div className="mt-6 flex gap-2">
+            {[{ key: "config", label: "Konfigurátor" }, { key: "compare", label: "Srovnání plánů" }, { key: "annual", label: "Roční kalkulátor" }].map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setTab(t.key)}
+                className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2"
+                style={{
+                  background: tab === t.key ? BRASS : "transparent",
+                  color: tab === t.key ? PAPER : "#C9CDD6",
+                  border: `1.5px solid ${tab === t.key ? BRASS : "#C9CDD640"}`,
+                  ["--tw-ring-color"]: BRASS,
+                }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      {tab === "config" && (
+      <>
+      <main className="max-w-5xl mx-auto px-6 sm:px-10 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-10">
+          <section
+            className="rounded-lg p-5"
+            style={{ background: PANEL, border: `1px solid ${HAIR}` }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <span
+                className="font-num inline-flex items-center justify-center w-7 h-7 rounded-full text-xs"
+                style={{ background: INK, color: BRASS, border: `1.5px solid ${BRASS}`, transform: "rotate(-6deg)" }}
+              >
+                §
+              </span>
+              <h2 className="font-display text-lg">V plánu, bez kreditu</h2>
+            </div>
+            <ul className="grid sm:grid-cols-2 gap-2 text-sm">
+              {INCLUDED.map((item) => (
+                <li key={item} className="flex items-start gap-2">
+                  <Check size={15} style={{ color: BRASS_DARK, marginTop: 2, flexShrink: 0 }} />
+                  <span style={{ color: INK_SOFT }}>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section>
+            <div className="rounded-lg overflow-hidden" style={{ border: `1.5px solid ${BRASS}`, background: `${BRASS}08` }}>
+              <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: `1px solid ${BRASS}33` }}>
+                <div>
+                  <p className="font-display text-base" style={{ color: INK }}>Free plán</p>
+                  <p className="text-xs" style={{ color: INK_SOFT }}>Jeden workspace per IČO — bez platební karty</p>
+                </div>
+                <span className="font-num text-lg font-medium" style={{ color: BRASS }}>0 Kč</span>
+              </div>
+              <ul className="px-4 py-3 grid sm:grid-cols-2 gap-y-2 gap-x-4">
+                {FREE_LIMITS.map((f) => (
+                  <li key={f.label} className="text-sm flex flex-col">
+                    <span className="flex items-center gap-1.5">
+                      <Check size={13} style={{ color: BRASS_DARK, flexShrink: 0 }} />
+                      <span>{f.label}</span>
+                      <span className="font-num text-xs ml-auto" style={{ color: BRASS_DARK }}>{f.limit}</span>
+                    </span>
+                    <span className="text-xs ml-5" style={{ color: INK_SOFT }}>{f.note}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="px-4 py-2.5 text-xs" style={{ borderTop: `1px solid ${BRASS}33`, color: INK_SOFT }}>
+                Bez archivace, auditní stopy a kreditových funkcí (KYC, exekuce, BankID, …). Po dosažení limitu je potřeba přejít na placený plán.
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="font-display text-xl mb-1">Celkový počet uživatelů</h2>
+            <p className="text-sm mb-3" style={{ color: INK_SOFT }}>
+              Všichni uživatelé mají v základu lehký přístup — podpis a základní AML. Balíčky pak
+              rozšíří vybrané uživatele o dokumentové sady.
+            </p>
+            <div
+              className="rounded-lg p-4 flex items-center justify-between gap-4"
+              style={{ background: PANEL, border: `1px solid ${HAIR}` }}
+            >
+              <div>
+                <p className="font-medium">Uživatelé</p>
+                <p className="text-xs" style={{ color: INK_SOFT }}>
+                  {kc(UTILITY_PRICE)} / uživatel / měsíc (lehký přístup)
+                </p>
+              </div>
+              <Stepper label="uživatelů celkem" value={totalUsers} onChange={setTotal} />
+            </div>
+          </section>
+
+          <section>
+            <h2 className="font-display text-xl mb-1">Balíčky dokumentů</h2>
+            <p className="text-sm mb-4" style={{ color: INK_SOFT }}>
+              Hotové sady od advokátů, garantovaná aktualizace. Jeden uživatel může mít libovolný počet balíčků.
+            </p>
+            <div className="space-y-3">
+              {PACKAGES.map((p) => {
+                const isActive = (seats[p.key] || 0) > 0;
+                const isFull = fullPkg[p.key];
+                const pricePerSeat = p.basePrice + (isFull ? p.fullAddon : 0);
+                return (
+                  <div
+                    key={p.key}
+                    className="rounded-lg overflow-hidden"
+                    style={{ border: `1px solid ${HAIR}`, background: PANEL }}
+                  >
+                    <div className="p-4 flex items-center justify-between gap-4 flex-wrap">
+                      <div>
+                        <p className="font-medium">{p.name}</p>
+                        <p className="text-xs" style={{ color: INK_SOFT }}>
+                          {p.desc}
+                        </p>
+                      </div>
+                      <Stepper
+                        label={`uživatele ${p.name}`}
+                        value={seats[p.key]}
+                        onChange={(v) => {
+                          setSeats((s) => ({ ...s, [p.key]: Math.min(v, totalUsers) }));
+                          if (v === 0) setFullPkg((s) => ({ ...s, [p.key]: false }));
+                        }}
+                      />
+                    </div>
+                    {isActive && (
+                      <div className="flex" style={{ borderTop: `1px solid ${HAIR}` }}>
+                        {[
+                          { key: false, label: "Základ", price: p.basePrice },
+                          { key: true, label: "Full", price: p.basePrice + p.fullAddon },
+                        ].map((opt) => (
+                          <button
+                            key={String(opt.key)}
+                            type="button"
+                            onClick={() => setFullPkg((s) => ({ ...s, [p.key]: opt.key }))}
+                            className="flex-1 py-2 px-3 text-sm transition-colors focus:outline-none"
+                            style={{
+                              background: isFull === opt.key ? INK : "transparent",
+                              color: isFull === opt.key ? PAPER : INK_SOFT,
+                              borderRight: opt.key === false ? `1px solid ${HAIR}` : "none",
+                            }}
+                          >
+                            <span className="font-medium">{opt.label}</span>
+                            <span className="font-num text-xs ml-2" style={{ opacity: 0.75 }}>
+                              {kc(opt.price)} / seat
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <section>
+            <button
+              type="button"
+              onClick={() => setEnterpriseOpen((v) => !v)}
+              className="w-full flex items-center justify-between gap-2 text-left focus:outline-none focus-visible:ring-2"
+              style={{ ["--tw-ring-color"]: TEAL }}
+            >
+              <div>
+                <h2 className="font-display text-xl">Enterprise rozšíření</h2>
+                {!anyEnterpriseActive && !enterpriseOpen && (
+                  <p className="text-sm" style={{ color: INK_SOFT }}>
+                    Whitelabel, SSO, privátní cloud, API — žádné aktivní
+                  </p>
+                )}
+                {anyEnterpriseActive && (
+                  <p className="text-sm" style={{ color: TEAL }}>
+                    {[
+                      whitelabel !== "none" && WHITELABEL_TIERS.find((t) => t.key === whitelabel).name,
+                      ...ADDONS.filter((a) => addons[a.key]).map((a) => a.name),
+                    ].filter(Boolean).join(" · ")}
+                  </p>
+                )}
+              </div>
+              <ChevronDown
+                size={18}
+                style={{
+                  color: INK_SOFT,
+                  flexShrink: 0,
+                  transform: (enterpriseOpen || anyEnterpriseActive) ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.2s",
+                }}
+              />
+            </button>
+
+            {(enterpriseOpen || anyEnterpriseActive) && (
+              <div className="mt-4">
+                <p className="text-sm mb-3" style={{ color: INK_SOFT }}>
+                  Samostatné příplatky nezávislé na tieru — whitelabel a technická rozšíření na jedné úrovni.
+                </p>
+                <div className="grid sm:grid-cols-3 gap-2">
+                  {WHITELABEL_TIERS.filter((t) => t.key !== "none").map((t) => (
+                    <Tile
+                      key={t.key}
+                      name={t.name}
+                      desc={t.desc}
+                      price={`${kc(t.price)} / měs`}
+                      active={whitelabel === t.key}
+                      onClick={() => {
+                        if (!enterpriseOpen) setEnterpriseOpen(true);
+                        if (t.key === "full") {
+                          const turningOn = whitelabel !== "full";
+                          setWhitelabel(turningOn ? "full" : "none");
+                          if (turningOn) setAddons((s) => ({ ...s, privatecloud: true }));
+                        } else {
+                          setWhitelabel(whitelabel === t.key ? "none" : t.key);
+                        }
+                      }}
+                    />
+                  ))}
+                  {ADDONS.map((a) => (
+                    <Tile
+                      key={a.key}
+                      name={a.name}
+                      desc={a.desc}
+                      price={`${kc(a.price)} / měs`}
+                      active={addons[a.key]}
+                      onClick={() => {
+                        if (a.key === "privatecloud") {
+                          const turningOff = addons.privatecloud;
+                          if (turningOff && whitelabel === "full") setWhitelabel("none");
+                        }
+                        setAddons((s) => ({ ...s, [a.key]: !s[a.key] }));
+                      }}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs mt-2" style={{ color: INK_SOFT }}>
+                  Full brand bez vlastní domény nedává smysl — výběr automaticky zapne i privátní cloud, a vypnutí privátního cloudu Full brand zase zruší.
+                </p>
+              </div>
+            )}
+          </section>
+
+          <section>
+            <button
+              type="button"
+              onClick={() => setSupportOpen((v) => !v)}
+              className="w-full flex items-center justify-between gap-2 text-left focus:outline-none focus-visible:ring-2"
+              style={{ ["--tw-ring-color"]: TEAL }}
+            >
+              <div>
+                <h2 className="font-display text-xl">Podpora</h2>
+                <p className="text-sm" style={{ color: support !== "standard" ? TEAL : INK_SOFT }}>
+                  {SUPPORT_TIERS.find((t) => t.key === support).name}
+                  {support === "standard" && " — e-mail v ceně"}
+                </p>
+              </div>
+              <ChevronDown size={18} style={{ color: INK_SOFT, flexShrink: 0, transform: supportOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+            </button>
+            {supportOpen && (
+              <div className="mt-4 grid sm:grid-cols-3 gap-2">
+                {SUPPORT_TIERS.map((t) => (
+                  <Tile
+                    key={t.key}
+                    name={t.name}
+                    desc={t.desc}
+                    price={t.price === 0 ? "v ceně" : `${kc(t.price)} / měs`}
+                    active={support === t.key}
+                    onClick={() => setSupport(t.key)}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+
+        <aside className="lg:sticky lg:top-6 self-start space-y-6">
+          <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${HAIR}`, background: PANEL }}>
+            <div className="px-5 py-4" style={{ background: INK }}>
+              <p className="font-num text-xs uppercase tracking-widest" style={{ color: BRASS }}>
+                Návrh smlouvy
+              </p>
+              <p className="font-display text-lg" style={{ color: PAPER }}>
+                {totalUsers} {totalUsers === 1 ? "uživatel" : "uživatelů"} v aplikaci
+              </p>
+            </div>
+            <div className="p-5">
+              <ul className="space-y-2 text-sm">
+                {lineItems.length === 0 && (
+                  <li style={{ color: INK_SOFT }}>Zatím nic nevybráno.</li>
+                )}
+                {lineItems.map((li, i) => (
+                  <li key={i} className="flex items-center justify-between gap-3 py-1.5" style={{ borderBottom: `1px solid ${HAIR}` }}>
+                    <span style={{ color: INK_SOFT }}>{li.label}</span>
+                    <span className="font-num">{kc(li.value)}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex items-center justify-between mt-4 pt-3" style={{ borderTop: `2px solid ${INK}` }}>
+                <span className="font-medium">Měsíčně</span>
+                <span className="font-num font-medium text-lg">{kc(monthlyTotal)}</span>
+              </div>
+
+              <div className="flex items-center justify-between mt-2 text-sm">
+                <span style={{ color: INK_SOFT }}>Aktivační poplatek (jednorázově)</span>
+                <span className="font-num" style={{ color: INK_SOFT }}>{kc(onboarding)}</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setAnnual((v) => !v)}
+                className="mt-4 w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors focus:outline-none focus-visible:ring-2"
+                style={{ border: `1.5px solid ${annual ? BRASS : HAIR}`, background: annual ? `${BRASS}14` : "transparent", ["--tw-ring-color"]: BRASS }}
+                role="checkbox"
+                aria-checked={annual}
+              >
+                <span>Roční platba (2 měsíce zdarma)</span>
+                <span className="font-num">{annual ? `−${kc(annualSavings)}` : "zapnout"}</span>
+              </button>
+              {annual && (
+                <p className="text-xs mt-2" style={{ color: INK_SOFT }}>
+                  Zaplatíte {kc(annualPay)} ročně místo {kc(monthlyTotal * 12)}.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-lg p-5" style={{ border: `1px solid ${HAIR}`, background: PANEL }}>
+            <div className="flex items-center gap-2 mb-3">
+              <Ticket size={16} style={{ color: TEAL }} />
+              <h3 className="font-display text-base">Kreditová peněženka</h3>
+            </div>
+            <p className="text-xs mb-3" style={{ color: INK_SOFT }}>
+              Vždy předplacená — kartou automaticky, nebo proforma před aktivací. Čím víc dobijete, tím víc dostanete.
+            </p>
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              {TOPUP_TIERS.map((t, i) => (
+                <button
+                  key={t.pay}
+                  type="button"
+                  onClick={() => setTopUpIdx(i)}
+                  className="px-3 py-2 rounded-md text-sm transition-colors focus:outline-none focus-visible:ring-2"
+                  style={{
+                    border: `1.5px solid ${i === topUpIdx ? TEAL : HAIR}`,
+                    background: i === topUpIdx ? `${TEAL}14` : "transparent",
+                    ["--tw-ring-color"]: TEAL,
+                  }}
+                >
+                  <span className="font-num">{kc(t.pay)}</span>
+                </button>
+              ))}
+            </div>
+            <p className="text-sm">
+              Dostanete <span className="font-num font-medium">{kc(tier.get)}</span> kreditu{" "}
+              <span style={{ color: TEAL }}>(+{bonusPct}%)</span>.
+            </p>
+          </div>
+        </aside>
+      </main>
+
+      <section className="max-w-5xl mx-auto px-6 sm:px-10 pb-16">
+        <div className="flex items-center gap-2 mb-3">
+          <Receipt size={16} style={{ color: TEAL }} />
+          <h2 className="font-display text-xl">Kreditový ceník</h2>
+        </div>
+        <p className="text-sm mb-4" style={{ color: INK_SOFT }}>
+          Položky, které nakupujeme od třetích stran — vždy s reálným nákladem, účtuje se kredit.
+        </p>
+        <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${HAIR}`, background: PANEL }}>
+          {CREDIT_ITEMS.map((c, i) => (
+            <div
+              key={c.name}
+              className="flex items-center justify-between px-4 py-2.5 text-sm"
+              style={{ borderTop: i === 0 ? "none" : `1px solid ${HAIR}` }}
+            >
+              <span>{c.name}</span>
+              <span className="font-num" style={{ color: TEAL }}>
+                {c.price}
+              </span>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs mt-4 italic" style={{ color: INK_SOFT }}>
+          Ceny u balíčků, lehkého přístupu, whitelabelu, enterprise rozšíření a vyšších úrovní
+          podpisu jsou ilustrativní — část kreditového ceníku odpovídá reálnému housefly.cz/cenik.
+          Rozšíření aplikace jsou nově v základu, bez příplatku.
+        </p>
+      </section>
+      </>
+      )}
+
+      {tab === "compare" && (
+      <section className="max-w-5xl mx-auto px-6 sm:px-10 py-10 pb-16">
+        <h2 className="font-display text-2xl mb-1">Srovnání plánů</h2>
+        <p className="text-sm mb-8" style={{ color: INK_SOFT }}>
+          Všichni uživatelé mají lehký přístup. Balíčky rozšiřují přístup k dokumentovým sadám — jeden uživatel může mít více balíčků.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm" style={{ borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th className="text-left py-3 pr-4 font-medium w-48" style={{ color: INK_SOFT, borderBottom: `2px solid ${INK}` }}></th>
+                {[
+                  { key: "free", label: "Free", price: "0 Kč" },
+                  { key: "light", label: "Lehký přístup", price: `${kc(UTILITY_PRICE)} / seat` },
+                  ...PACKAGES.map((p) => ({ key: p.key, label: p.name, price: `od ${kc(p.basePrice)} / seat` })),
+                ].map((col) => (
+                  <th key={col.key} className="text-center py-3 px-3 font-medium" style={{ borderBottom: `2px solid ${INK}`, minWidth: 110, color: col.key === "free" ? BRASS : INK }}>
+                    <p className="font-display text-base">{col.label}</p>
+                    <p className="font-num text-xs font-normal mt-0.5" style={{ color: INK_SOFT }}>{col.price}</p>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARE_ROWS.map((group) => (
+                <React.Fragment key={group.category}>
+                  <tr key={group.category}>
+                    <td colSpan={6} className="pt-6 pb-1 text-xs font-medium uppercase tracking-wider" style={{ color: BRASS }}>
+                      {group.category}
+                    </td>
+                  </tr>
+                  {group.rows.map((row, i) => (
+                    <tr key={row.label} style={{ background: i % 2 === 0 ? PANEL : "transparent" }}>
+                      <td className="py-2.5 pr-4" style={{ color: INK_SOFT, borderBottom: `1px solid ${HAIR}` }}>
+                        {row.label}
+                        {row.addon && <span className="ml-1 text-xs" style={{ color: BRASS }}>rozšíření</span>}
+                      </td>
+                      {["free", "light", "reality", "hr", "korporat"].map((col) => {
+                        const val = row[col];
+                        return (
+                          <td key={col} className="py-2.5 px-3 text-center" style={{ borderBottom: `1px solid ${HAIR}` }}>
+                            {val === true ? (
+                              <Check size={16} className="inline-block" style={{ color: col === "free" ? BRASS : TEAL }} />
+                            ) : val === false ? (
+                              <span style={{ color: HAIR }}>—</span>
+                            ) : (
+                              <span className="font-num text-xs">{val}</span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </React.Fragment>
+              ))}
+              <tr>
+                <td colSpan={6} className="pt-6 pb-1 text-xs font-medium uppercase tracking-wider" style={{ color: BRASS }}>
+                  Podpora
+                </td>
+              </tr>
+              {SUPPORT_TIERS.map((t, i) => (
+                <tr key={t.key} style={{ background: i % 2 === 0 ? PANEL : "transparent" }}>
+                  <td className="py-2.5 pr-4" style={{ color: INK_SOFT, borderBottom: `1px solid ${HAIR}` }}>
+                    {t.name}
+                    <p className="text-xs" style={{ color: HAIR }}>{t.desc}</p>
+                  </td>
+                  {["free", "light", "reality", "hr", "korporat"].map((col) => (
+                    <td key={col} className="py-2.5 px-3 text-center font-num text-xs" style={{ borderBottom: `1px solid ${HAIR}`, color: INK_SOFT }}>
+                      {col === "free" ? (t.price === 0 ? "v ceně" : "—") : (t.price === 0 ? "v ceně" : `+${kc(t.price)}`)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      )}
+
+      {tab === "annual" && (() => {
+        const monthlyLicense = packagesMonthly + utilityMonthly + whitelabelMonthly + addonsMonthly + supportMonthly;
+        const monthlyCreditSpend = CREDIT_CALC.reduce((s, c) => s + (volumes[c.key] || 0) * c.price, 0);
+        const monthlyTotal_ = monthlyLicense + monthlyCreditSpend;
+        const annualTotal = monthlyTotal_ * 12;
+        const annualLicense = monthlyLicense * 12;
+        const annualCredit = monthlyCreditSpend * 12;
+
+        return (
+        <section className="max-w-5xl mx-auto px-6 sm:px-10 py-10 pb-16">
+          <h2 className="font-display text-2xl mb-1">Roční kalkulátor</h2>
+          <p className="text-sm mb-8" style={{ color: INK_SOFT }}>
+            Zadejte průměrné měsíční objemy kreditových položek. Licenční část se přebírá z konfigurátoru.
+          </p>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-2">
+              <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${HAIR}` }}>
+                <div className="px-4 py-2.5 grid grid-cols-12 text-xs font-medium uppercase tracking-wider" style={{ background: INK, color: BRASS }}>
+                  <span className="col-span-6">Položka</span>
+                  <span className="col-span-2 text-center">Cena / ks</span>
+                  <span className="col-span-2 text-center">Ø / měsíc</span>
+                  <span className="col-span-2 text-right">/ měsíc</span>
+                </div>
+                {CREDIT_CALC.map((c, i) => {
+                  const monthly = (volumes[c.key] || 0) * c.price;
+                  return (
+                    <div
+                      key={c.key}
+                      className="px-4 py-2 grid grid-cols-12 items-center text-sm"
+                      style={{ background: i % 2 === 0 ? PANEL : "transparent", borderTop: `1px solid ${HAIR}` }}
+                    >
+                      <div className="col-span-6">
+                        <p>{c.label}</p>
+                        <p className="text-xs" style={{ color: INK_SOFT }}>{c.unit}</p>
+                      </div>
+                      <div className="col-span-2 text-center font-num text-xs" style={{ color: INK_SOFT }}>
+                        {kc(c.price)}
+                      </div>
+                      <div className="col-span-2 flex justify-center">
+                        <input
+                          type="number"
+                          min={0}
+                          value={volumes[c.key] || ""}
+                          placeholder="0"
+                          onChange={(e) => setVolumes((v) => ({ ...v, [c.key]: Math.max(0, parseInt(e.target.value) || 0) }))}
+                          className="w-16 text-center rounded px-2 py-1 font-num text-sm focus:outline-none focus-visible:ring-2"
+                          style={{ border: `1.5px solid ${HAIR}`, background: PAPER, color: INK, ["--tw-ring-color"]: TEAL }}
+                        />
+                      </div>
+                      <div className="col-span-2 text-right font-num text-sm" style={{ color: monthly > 0 ? TEAL : INK_SOFT }}>
+                        {monthly > 0 ? kc(monthly) : "—"}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setVolumes(Object.fromEntries(CREDIT_CALC.map((c) => [c.key, 0])))}
+                  className="text-xs px-3 py-1 rounded focus:outline-none"
+                  style={{ color: INK_SOFT, border: `1px solid ${HAIR}` }}
+                >
+                  Vynulovat
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4 lg:sticky lg:top-6 self-start">
+              <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${HAIR}`, background: PANEL }}>
+                <div className="px-5 py-4" style={{ background: INK }}>
+                  <p className="font-num text-xs uppercase tracking-widest" style={{ color: BRASS }}>Roční souhrn</p>
+                  <p className="font-display text-lg" style={{ color: PAPER }}>Celková roční útrata</p>
+                </div>
+                <div className="p-5 space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span style={{ color: INK_SOFT }}>Licence (měsíčně)</span>
+                    <span className="font-num">{kc(monthlyLicense)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span style={{ color: INK_SOFT }}>Kredity (měsíčně)</span>
+                    <span className="font-num" style={{ color: TEAL }}>{kc(monthlyCreditSpend)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm pt-2" style={{ borderTop: `1px solid ${HAIR}` }}>
+                    <span style={{ color: INK_SOFT }}>Celkem / měsíc</span>
+                    <span className="font-num">{kc(monthlyTotal_)}</span>
+                  </div>
+                  <div className="flex justify-between items-baseline pt-3 mt-1" style={{ borderTop: `2px solid ${INK}` }}>
+                    <span className="font-medium">Celkem / rok</span>
+                    <span className="font-num font-medium text-2xl">{kc(annualTotal)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-lg p-4 space-y-2" style={{ border: `1px solid ${HAIR}`, background: PANEL }}>
+                <p className="text-xs font-medium uppercase tracking-wider" style={{ color: BRASS }}>Rozpad na rok</p>
+                {[
+                  { label: "Licence", value: annualLicense, pct: annualTotal > 0 ? Math.round(annualLicense / annualTotal * 100) : 0 },
+                  { label: "Kredity", value: annualCredit, pct: annualTotal > 0 ? Math.round(annualCredit / annualTotal * 100) : 0 },
+                ].map((row) => (
+                  <div key={row.label}>
+                    <div className="flex justify-between text-xs mb-1" style={{ color: INK_SOFT }}>
+                      <span>{row.label}</span>
+                      <span className="font-num">{kc(row.value)} ({row.pct} %)</span>
+                    </div>
+                    <div className="rounded-full h-1.5 overflow-hidden" style={{ background: HAIR }}>
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${row.pct}%`, background: row.label === "Licence" ? INK : TEAL }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-xs" style={{ color: INK_SOFT }}>
+                Licenční část vychází z aktuálního nastavení v konfigurátoru. Kreditové položky jsou orientační — skutečná útrata závisí na reálném provozu.
+              </p>
+            </div>
+          </div>
+        </section>
+        );
+      })()}
+    </div>
+  );
+}
+
+
+const rootEl = document.getElementById('root');
+ReactDOM.createRoot(rootEl).render(<PricingCalculator />);
+
+</script>
+</body>
+</html>
