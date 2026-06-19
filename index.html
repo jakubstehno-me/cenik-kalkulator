@@ -137,6 +137,12 @@ const CREDIT_ITEMS = [
   { name: "Komerční credit scoring firmy (CRIF/Bisnode/Coface)", price: "99 Kč" },
   { name: "Výpis ze skutečných majitelů — ESM (vyžaduje oprávněný zájem / AML přístup)", price: "149 Kč" },
   { name: "Katastr nemovitostí — list vlastnictví (LV)", price: "100 Kč" },
+  { name: "Informace o parcele/budově/jednotce (WSDP)", price: "79 Kč" },
+  { name: "Přehled vlastnictví — celostátní pro subjekt (WSDP)", price: "149 Kč" },
+  { name: "Sbírka listin / nabývací tituly", price: "89 Kč" },
+  { name: "Cenové údaje (kupní ceny z KN)", price: "89 Kč" },
+  { name: "Vyjádření o existenci sítí (orchestrace, zákonná lhůta)", price: "99 Kč" },
+  { name: "Odhad tržní ceny nemovitosti (AVM)", price: "149 Kč" },
   { name: "AI asistent (generování / review dokumentu)", price: "1 Kč / 1 000 tokenů" },
   { name: "Archivace dokumentu — časové razítko + certifikát (jednorázově při uložení)", price: "4 Kč / dokument" },
   { name: "Obnova archivní platnosti — re-timestamping před expirací certifikátu (automaticky, ročně)", price: "1 Kč / dokument / rok" },
@@ -281,6 +287,51 @@ const COMPANY_CHECK_TIERS = [
   },
 ];
 
+const PROPERTY_CHECK_TIERS = [
+  {
+    key: "zakladni",
+    name: "Základní",
+    price: 0,
+    alacarte: 0,
+    note: "V plánu, neomezeně (3× měsíčně i ve Free)",
+    items: [
+      "Nahlížení do KN — vlastník podle adresy/parcely (informační)",
+      "WSDP existence check — vlastní/nevlastní subjekt v KN",
+      "BPEJ / bonita půdy (VÚMOP)",
+      "Povodňová zóna Q5/Q20/Q100/Q500 (DIBAVOD/VÚV)",
+      "Radonový index (ČGS)",
+      "Ochranná pásma — CHKO, Natura 2000 (AOPK ČR)",
+      "Občanská vybavenost — vlastní výpočet z OSM/RÚIAN",
+      "Územní plán (pokud obec publikuje veřejně)",
+    ],
+  },
+  {
+    key: "kompletni",
+    name: "Kompletní",
+    price: 249,
+    alacarte: 328,
+    note: "Vše ze Základní + jednorázový kredit za:",
+    items: [
+      "Katastr — list vlastnictví, LV (100 Kč)",
+      "Informace o parcele/budově/jednotce (79 Kč)",
+      "Přehled vlastnictví — celostátní pro subjekt (149 Kč)",
+    ],
+  },
+  {
+    key: "rozsirena",
+    name: "Rozšířená kompletní",
+    price: 599,
+    alacarte: 754,
+    note: "Vše z Kompletní + jednorázový kredit za:",
+    items: [
+      "Sbírka listin / nabývací tituly (89 Kč)",
+      "Cenové údaje — kupní ceny z KN (89 Kč)",
+      "Vyjádření o existenci sítí (99 Kč) — zákonná lhůta, orchestrace přes UtilityReport.cz",
+      "Odhad tržní ceny — AVM (149 Kč)",
+    ],
+  },
+];
+
 const SUPPORT_TIERS = [
   { key: "standard", name: "Standard", desc: "Chatbot a e-mail podpora v pracovní době.", price: 0 },
   { key: "plus", name: "Plus", desc: "Živý chat v aplikaci + e-mail, odpověď do 4 hodin.", price: 990 },
@@ -344,6 +395,12 @@ const CREDIT_CALC = [
   { key: "creditscoringfirma", label: "Komerční credit scoring firmy", unit: "kontrola", price: 99 },
   { key: "esm", label: "Výpis ze skutečných majitelů (ESM)", unit: "výpis", price: 149 },
   { key: "lv", label: "Katastr — list vlastnictví (LV)", unit: "výpis", price: 100 },
+  { key: "parcela", label: "Informace o parcele/budově/jednotce", unit: "výstup", price: 79 },
+  { key: "prehledvlastnictvi", label: "Přehled vlastnictví — celostátní", unit: "výstup", price: 149 },
+  { key: "sbirkalistin", label: "Sbírka listin / nabývací tituly", unit: "výstup", price: 89 },
+  { key: "cenoveudaje", label: "Cenové údaje (kupní ceny)", unit: "výstup", price: 89 },
+  { key: "site", label: "Vyjádření o existenci sítí", unit: "vyjádření", price: 99 },
+  { key: "avm", label: "Odhad tržní ceny (AVM)", unit: "odhad", price: 149 },
   { key: "ai", label: "AI asistent", unit: "1 000 tokenů", price: 1 },
   { key: "archivace", label: "Archivace dokumentu", unit: "dokument", price: 4 },
   { key: "retimestamp", label: "Obnova archivní platnosti (ročně)", unit: "dokument", price: 1 },
@@ -974,12 +1031,22 @@ function PricingCalculator() {
           <CheckTierGrid tiers={COMPANY_CHECK_TIERS} />
         </div>
 
+        <div className="mt-10">
+          <h2 className="font-display text-xl mb-1">Prověření nemovitosti — balíčky</h2>
+          <p className="text-sm mb-4" style={{ color: INK_SOFT }}>
+            Pro nemovitost nebo pozemek jako takový — bonita, povodně, sítě a občanská vybavenost
+            v základu. WSDP existence check (vlastní/nevlastní) je zdarma, ověřený výpis s razítkem
+            (LV, parcela, přehled vlastnictví) je placený výstup.
+          </p>
+          <CheckTierGrid tiers={PROPERTY_CHECK_TIERS} />
+        </div>
+
         <div
           className="mt-10 rounded-lg p-5"
           style={{ background: `${BRASS}0D`, border: `1px dashed ${BRASS}66` }}
         >
           <p className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: BRASS }}>
-            Interní poznámka — cross-sell mezi FO, OSVČ a firmou (není položka ceníku)
+            Interní poznámka — cross-sell mezi FO, OSVČ, firmou a nemovitostí (není položka ceníku)
           </p>
           <ul className="space-y-2 text-sm" style={{ color: INK_SOFT }}>
             <li>
@@ -1009,6 +1076,21 @@ function PricingCalculator() {
               další firmy a osoby. Cena takového rozšíření se nesčítá do nového bundlu — je to
               N × cena Základní/Kompletní/Rozšířené prověrky podle zvolené hloubky pro každý nově
               přidaný subjekt/osobu, ne nová položka ceníku.
+            </li>
+            <li>
+              <span style={{ color: INK, fontWeight: 500 }}>FO/OSVČ/Firma → Nemovitost (datově podmíněné, přes WSDP):</span>{" "}
+              Při jakékoliv prověrce subjektu spustit zdarma WSDP existence check (ctiOS/zjednodušené
+              zadání) — zda subjekt v KN něco vlastní. Pokud ano, zobrazit počet nalezených nemovitostí
+              a nabídnout Kompletní/Rozšířenou prověrku nemovitosti pro vybrané nebo všechny z nich —
+              tím se stahuje placený výstup (LV, přehled vlastnictví) jen tam, kde existence checku
+              skutečně něco našel, ne naslepo.
+            </li>
+            <li>
+              <span style={{ color: INK, fontWeight: 500 }}>Nemovitost → vlastník (odvozené, ne primární požadavek):</span>{" "}
+              Opačný směr vyplývá ze stejných dat — LV obsahuje identitu vlastníka, takže po stažení
+              Kompletní prověrky nemovitosti lze nabídnout odpovídající FO/OSVČ/Firma prověrku přímo
+              na zjištěného vlastníka. Není to nic, co je potřeba zvlášť stavět — jen UX rozhodnutí,
+              jestli to nabízet automaticky.
             </li>
           </ul>
         </div>
