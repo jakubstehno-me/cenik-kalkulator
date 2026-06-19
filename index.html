@@ -130,6 +130,10 @@ const CREDIT_ITEMS = [
   { name: "Bankovní/nebankovní registr klientských informací (BRKI/NRKI)", price: "59 Kč" },
   { name: "Ověření trvalé adresy na obecním úřadě", price: "59 Kč" },
   { name: "Registr dlužníků UA (komerční agregátor)", price: "89 Kč" },
+  { name: "Komerční credit scoring OSVČ (CRIF/Bisnode/Coface)", price: "79 Kč" },
+  { name: "Potvrzení o bezdlužnosti — ČSSZ (vyžaduje souhlas, úřední lhůta až 30 dní)", price: "49 Kč" },
+  { name: "Potvrzení o bezdlužnosti — zdravotní pojišťovna (vyžaduje souhlas)", price: "39 Kč" },
+  { name: "Mezinárodní B2B databáze (Dun & Bradstreet)", price: "99 Kč" },
   { name: "Katastr nemovitostí — list vlastnictví (LV)", price: "100 Kč" },
   { name: "AI asistent (generování / review dokumentu)", price: "1 Kč / 1 000 tokenů" },
   { name: "Archivace dokumentu — časové razítko + certifikát (jednorázově při uložení)", price: "4 Kč / dokument" },
@@ -177,6 +181,53 @@ const PERSON_CHECK_TIERS = [
       "SOLUS — registr dlužníků (39 Kč) — vyžaduje souhlas",
       "BRKI/NRKI — bankovní registr (59 Kč) — vyžaduje souhlas",
       "Ověření trvalé adresy na obecním úřadě (59 Kč)",
+    ],
+  },
+];
+
+const BUSINESS_CHECK_TIERS = [
+  {
+    key: "zakladni",
+    name: "Základní",
+    price: 0,
+    alacarte: 0,
+    note: "V plánu, neomezeně (3× měsíčně i ve Free)",
+    items: [
+      "ARES — IČO, DIČ, právní forma, sídlo",
+      "Živnostenský rejstřík — obory podnikání, datum zahájení/pozastavení/zrušení",
+      "Registr plátců DPH — nespolehlivý plátce, zveřejněné bankovní účty, FÚ",
+      "VIES — ověření DIČ pro EU obchod",
+      "Insolvenční a obchodní rejstřík (křížová kontrola)",
+      "Datová schránka — existence a aktivita",
+      "ČOI — veřejný seznam sankcí",
+      "Profesní komory (ČAK, ČKAIT, KDP...) — oprávnění k vázané/koncesované živnosti",
+    ],
+  },
+  {
+    key: "kompletni",
+    name: "Kompletní",
+    price: 189,
+    alacarte: 248,
+    note: "Vše ze Základní + jednorázový kredit za:",
+    items: [
+      "Exekuční kontrola ČR (49 Kč)",
+      "Exekuční kontrola SK (79 Kč)",
+      "PEP / sankční kontrola — mezinárodní (19 Kč)",
+      "PEP / sankční kontrola — ČR (22 Kč)",
+      "Komerční credit scoring — CRIF/Bisnode/Coface (79 Kč)",
+    ],
+  },
+  {
+    key: "rozsirena",
+    name: "Rozšířená kompletní",
+    price: 399,
+    alacarte: 494,
+    note: "Vše z Kompletní + jednorázový kredit za:",
+    items: [
+      "Výpis z rejstříku trestů ČR (49 Kč) — vyžaduje souhlas, relevantní pro vázané/koncesované živnosti",
+      "SOLUS — registr dlužníků (39 Kč) — vyžaduje souhlas",
+      "BRKI/NRKI — bankovní registr (59 Kč) — vyžaduje souhlas",
+      "Mezinárodní B2B databáze — Dun & Bradstreet (99 Kč)",
     ],
   },
 ];
@@ -237,6 +288,10 @@ const CREDIT_CALC = [
   { key: "brkinrki", label: "BRKI/NRKI — bankovní registr", unit: "kontrola", price: 59 },
   { key: "adresa", label: "Ověření trvalé adresy (obecní úřad)", unit: "ověření", price: 59 },
   { key: "dluznikua", label: "Registr dlužníků UA", unit: "kontrola", price: 89 },
+  { key: "creditscoring", label: "Komerční credit scoring OSVČ", unit: "kontrola", price: 79 },
+  { key: "bezdluznostcssz", label: "Potvrzení o bezdlužnosti — ČSSZ", unit: "potvrzení", price: 49 },
+  { key: "bezdluznostpojistovna", label: "Potvrzení o bezdlužnosti — pojišťovna", unit: "potvrzení", price: 39 },
+  { key: "b2bdatabaze", label: "Mezinárodní B2B databáze (D&B)", unit: "kontrola", price: 99 },
   { key: "lv", label: "Katastr — list vlastnictví (LV)", unit: "výpis", price: 100 },
   { key: "ai", label: "AI asistent", unit: "1 000 tokenů", price: 1 },
   { key: "archivace", label: "Archivace dokumentu", unit: "dokument", price: 4 },
@@ -303,6 +358,52 @@ function Tile({ active, onClick, name, desc, price, accent = TEAL }) {
         {price}
       </p>
     </button>
+  );
+}
+
+function CheckTierGrid({ tiers }) {
+  return (
+    <div className="grid md:grid-cols-3 gap-3">
+      {tiers.map((tier) => {
+        const savings = tier.alacarte - tier.price;
+        return (
+          <div
+            key={tier.key}
+            className="rounded-lg p-4 flex flex-col"
+            style={{ background: PANEL, border: `1px solid ${HAIR}` }}
+          >
+            <p className="font-display text-base">{tier.name}</p>
+            <div className="flex items-baseline gap-2 mt-1 mb-1">
+              <span className="font-num text-lg font-medium">
+                {tier.price === 0 ? "0 Kč" : `${tier.price} Kč`}
+              </span>
+              {savings > 0 && (
+                <span className="font-num text-xs line-through" style={{ color: INK_SOFT }}>
+                  {tier.alacarte} Kč
+                </span>
+              )}
+            </div>
+            {savings > 0 && (
+              <span
+                className="text-xs font-medium self-start px-2 py-0.5 rounded-full mb-2"
+                style={{ background: `${TEAL}1A`, color: TEAL }}
+              >
+                ušetříte {savings} Kč
+              </span>
+            )}
+            <p className="text-xs mb-2" style={{ color: BRASS }}>{tier.note}</p>
+            <ul className="space-y-1.5 mt-1">
+              {tier.items.map((it) => (
+                <li key={it} className="flex items-start gap-1.5 text-xs" style={{ color: INK_SOFT }}>
+                  <Check size={12} style={{ color: BRASS_DARK, marginTop: 2, flexShrink: 0 }} />
+                  <span>{it}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -798,47 +899,18 @@ function PricingCalculator() {
             Stejné položky jako v kreditovém ceníku výše, jen jako jednorázový balíček na jednu
             prověřovanou osobu — s výhodnější cenou než nákup položek zvlášť.
           </p>
-          <div className="grid md:grid-cols-3 gap-3">
-            {PERSON_CHECK_TIERS.map((tier) => {
-              const savings = tier.alacarte - tier.price;
-              return (
-                <div
-                  key={tier.key}
-                  className="rounded-lg p-4 flex flex-col"
-                  style={{ background: PANEL, border: `1px solid ${HAIR}` }}
-                >
-                  <p className="font-display text-base">{tier.name}</p>
-                  <div className="flex items-baseline gap-2 mt-1 mb-1">
-                    <span className="font-num text-lg font-medium">
-                      {tier.price === 0 ? "0 Kč" : `${tier.price} Kč`}
-                    </span>
-                    {savings > 0 && (
-                      <span className="font-num text-xs line-through" style={{ color: INK_SOFT }}>
-                        {tier.alacarte} Kč
-                      </span>
-                    )}
-                  </div>
-                  {savings > 0 && (
-                    <span
-                      className="text-xs font-medium self-start px-2 py-0.5 rounded-full mb-2"
-                      style={{ background: `${TEAL}1A`, color: TEAL }}
-                    >
-                      ušetříte {savings} Kč
-                    </span>
-                  )}
-                  <p className="text-xs mb-2" style={{ color: BRASS }}>{tier.note}</p>
-                  <ul className="space-y-1.5 mt-1">
-                    {tier.items.map((it) => (
-                      <li key={it} className="flex items-start gap-1.5 text-xs" style={{ color: INK_SOFT }}>
-                        <Check size={12} style={{ color: BRASS_DARK, marginTop: 2, flexShrink: 0 }} />
-                        <span>{it}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
+          <CheckTierGrid tiers={PERSON_CHECK_TIERS} />
+        </div>
+
+        <div className="mt-10">
+          <h2 className="font-display text-xl mb-1">Prověření OSVČ — balíčky</h2>
+          <p className="text-sm mb-4" style={{ color: INK_SOFT }}>
+            Stejná logika, jen zaměřená na podnikající fyzickou osobu — registr plátců DPH,
+            živnostenské oprávnění a obchodní rejstřík navíc oproti běžné prověrce osoby.
+            Potvrzení o bezdlužnosti (ČSSZ, zdravotní pojišťovna) má úřední lhůtu až 30 dní,
+            proto zůstává mimo bundly jako samostatná položka v kreditovém ceníku.
+          </p>
+          <CheckTierGrid tiers={BUSINESS_CHECK_TIERS} />
         </div>
       </section>
       </>
