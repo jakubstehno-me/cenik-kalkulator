@@ -137,6 +137,50 @@ const CREDIT_ITEMS = [
   { name: "Navýšení úložiště nad 10 GB", price: "79 Kč / 50 GB / měs" },
 ];
 
+const PERSON_CHECK_TIERS = [
+  {
+    key: "zakladni",
+    name: "Základní",
+    price: 0,
+    alacarte: 0,
+    note: "V plánu, neomezeně (3× měsíčně i ve Free)",
+    items: [
+      "ČR: obchodní/živnostenský rejstřík, insolvence, hledané osoby",
+      "SK: obchodný/živnostenský register, registr úpadcov, dlžníci finančnej správy a poisťovní, hľadané osoby",
+      "UA: registr korupce, hledané osoby",
+      "Sociální sítě (vlastní scraper)",
+    ],
+  },
+  {
+    key: "kompletni",
+    name: "Kompletní",
+    price: 199,
+    alacarte: 263,
+    note: "Vše ze Základní + jednorázový kredit za:",
+    items: [
+      "Exekuční kontrola ČR (49 Kč)",
+      "Exekuční kontrola SK (79 Kč)",
+      "PEP / sankční kontrola — mezinárodní (19 Kč)",
+      "PEP / sankční kontrola — ČR (22 Kč)",
+      "Ztracený / odcizený doklad (5 Kč)",
+      "Registr dlužníků UA (89 Kč)",
+    ],
+  },
+  {
+    key: "rozsirena",
+    name: "Rozšířená kompletní",
+    price: 449,
+    alacarte: 469,
+    note: "Vše z Kompletní + jednorázový kredit za:",
+    items: [
+      "Výpis z rejstříku trestů ČR (49 Kč) — vyžaduje souhlas prověřované osoby",
+      "SOLUS — registr dlužníků (39 Kč) — vyžaduje souhlas",
+      "BRKI/NRKI — bankovní registr (59 Kč) — vyžaduje souhlas",
+      "Ověření trvalé adresy na obecním úřadě (59 Kč)",
+    ],
+  },
+];
+
 const SUPPORT_TIERS = [
   { key: "standard", name: "Standard", desc: "Chatbot a e-mail podpora v pracovní době.", price: 0 },
   { key: "plus", name: "Plus", desc: "Živý chat v aplikaci + e-mail, odpověď do 4 hodin.", price: 990 },
@@ -747,6 +791,55 @@ function PricingCalculator() {
           podpisu jsou ilustrativní — část kreditového ceníku odpovídá reálnému housefly.cz/cenik.
           Rozšíření aplikace jsou nově v základu, bez příplatku.
         </p>
+
+        <div className="mt-10">
+          <h2 className="font-display text-xl mb-1">Prověření osoby — balíčky</h2>
+          <p className="text-sm mb-4" style={{ color: INK_SOFT }}>
+            Stejné položky jako v kreditovém ceníku výše, jen jako jednorázový balíček na jednu
+            prověřovanou osobu — s výhodnější cenou než nákup položek zvlášť.
+          </p>
+          <div className="grid md:grid-cols-3 gap-3">
+            {PERSON_CHECK_TIERS.map((tier) => {
+              const savings = tier.alacarte - tier.price;
+              return (
+                <div
+                  key={tier.key}
+                  className="rounded-lg p-4 flex flex-col"
+                  style={{ background: PANEL, border: `1px solid ${HAIR}` }}
+                >
+                  <p className="font-display text-base">{tier.name}</p>
+                  <div className="flex items-baseline gap-2 mt-1 mb-1">
+                    <span className="font-num text-lg font-medium">
+                      {tier.price === 0 ? "0 Kč" : `${tier.price} Kč`}
+                    </span>
+                    {savings > 0 && (
+                      <span className="font-num text-xs line-through" style={{ color: INK_SOFT }}>
+                        {tier.alacarte} Kč
+                      </span>
+                    )}
+                  </div>
+                  {savings > 0 && (
+                    <span
+                      className="text-xs font-medium self-start px-2 py-0.5 rounded-full mb-2"
+                      style={{ background: `${TEAL}1A`, color: TEAL }}
+                    >
+                      ušetříte {savings} Kč
+                    </span>
+                  )}
+                  <p className="text-xs mb-2" style={{ color: BRASS }}>{tier.note}</p>
+                  <ul className="space-y-1.5 mt-1">
+                    {tier.items.map((it) => (
+                      <li key={it} className="flex items-start gap-1.5 text-xs" style={{ color: INK_SOFT }}>
+                        <Check size={12} style={{ color: BRASS_DARK, marginTop: 2, flexShrink: 0 }} />
+                        <span>{it}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </section>
       </>
       )}
