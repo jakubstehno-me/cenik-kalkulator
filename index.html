@@ -912,6 +912,30 @@ function PricingCalculator() {
           </p>
           <CheckTierGrid tiers={BUSINESS_CHECK_TIERS} />
         </div>
+
+        <div
+          className="mt-10 rounded-lg p-5"
+          style={{ background: `${BRASS}0D`, border: `1px dashed ${BRASS}66` }}
+        >
+          <p className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: BRASS }}>
+            Interní poznámka — cross-sell mezi FO a OSVČ (není položka ceníku)
+          </p>
+          <ul className="space-y-2 text-sm" style={{ color: INK_SOFT }}>
+            <li>
+              <span style={{ color: INK, fontWeight: 500 }}>FO → OSVČ (datově podmíněné):</span>{" "}
+              Základní prověrka FO už dnes obsahuje lookup do živnostenského rejstříku zdarma. Pokud
+              vrátí nález (aktivní i historické živnostenské oprávnění), automaticky nabídnout
+              rozšíření na Kompletní/Rozšířenou OSVČ prověrku — trigger je výsledek RŽP dotazu, ne
+              ruční rozhodnutí prodejce.
+            </li>
+            <li>
+              <span style={{ color: INK, fontWeight: 500 }}>OSVČ → FO (stálá nabídka, ne nález):</span>{" "}
+              U OSVČ prověrky je už předem jasné, že jde o fyzickou osobu — tady není co objevovat.
+              Místo triggeru jde o standing nabídku doplnit položky, které OSVČ bundly neřeší
+              (ztracený doklad, registr dlužníků UA, ověření trvalé adresy).
+            </li>
+          </ul>
+        </div>
       </section>
       </>
       )}
