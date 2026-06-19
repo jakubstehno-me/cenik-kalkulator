@@ -270,6 +270,7 @@ function PricingCalculator() {
   const [enterpriseOpen, setEnterpriseOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [tab, setTab] = useState("config");
+  const [topUpAmount, setTopUpAmount] = useState(0);
 
   const setTotal = (v) => {
     const newTotal = Math.max(0, v);
@@ -299,6 +300,22 @@ function PricingCalculator() {
 
   const tier = TOPUP_TIERS[topUpIdx];
   const bonusPct = Math.round(((tier.get - tier.pay) / tier.pay) * 100);
+
+  // Varianta: Vše kredit
+  const annualLicense = monthlyTotal * 12;
+  const dailyRate = annualLicense / 365;
+  const walletBonusEligible = annualLicense > 0 && topUpAmount >= annualLicense;
+  const walletBonusPct = walletBonusEligible ? 20 : 0;
+  const walletCredited = topUpAmount * (1 + walletBonusPct / 100);
+  const walletBonusValue = walletCredited - topUpAmount;
+  const monthlyCreditSpend = CREDIT_CALC.reduce((s, c) => s + (volumes[c.key] || 0) * c.price, 0);
+  const annualCreditSpend = monthlyCreditSpend * 12;
+  const dailyBurn = dailyRate + monthlyCreditSpend * 12 / 365;
+  const runwayLicenseOnly = dailyRate > 0 ? Math.round(walletCredited / dailyRate) : 0;
+  const runwayWithSpend = dailyBurn > 0 ? Math.round(walletCredited / dailyBurn) : 0;
+  const bonusCoversSpend = walletBonusValue >= annualCreditSpend && annualCreditSpend > 0;
+
+  const kc2 = (n) => n.toLocaleString("cs-CZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " Kč";
 
   const lineItems = [
     { label: `Lehký přístup × ${totalUsers}`, value: utilityMonthly },
@@ -338,7 +355,7 @@ function PricingCalculator() {
             a počítá se v reálném čase.
           </p>
           <div className="mt-6 flex gap-2">
-            {[{ key: "config", label: "Konfigurátor" }, { key: "compare", label: "Srovnání plánů" }, { key: "annual", label: "Roční kalkulátor" }].map((t) => (
+            {[{ key: "config", label: "Konfigurátor" }, { key: "compare", label: "Srovnání plánů" }, { key: "annual", label: "Roční kalkulátor" }, { key: "wallet", label: "Varianta: Vše kredit" }].map((t) => (
               <button
                 key={t.key}
                 type="button"
@@ -930,6 +947,182 @@ function PricingCalculator() {
         </section>
         );
       })()}
+
+      {tab === "wallet" && (
+        <section className="max-w-5xl mx-auto px-6 sm:px-10 py-10 pb-16">
+          <h2 className="font-display text-2xl mb-1">Varianta: Vše kredit</h2>
+          <p className="text-sm mb-2 max-w-2xl" style={{ color: INK_SOFT }}>
+            Žádná faktura za licenci zvlášť. Vše — licence, balíčky, rozšíření i spotřební položky —
+            se strhává z jedné peněženky. Klient dostává jediný typ dokladu: dobití kreditu.
+          </p>
+          <p className="text-sm mb-8 max-w-2xl" style={{ color: INK_SOFT }}>
+            Místo ročního zvýhodnění licence rozhoduje výše dobití: pod roční hodnotu vašeho nastavení žádný bonus, na roční hodnotu a více <span style={{ color: TEAL, fontWeight: 500 }}>+20 % kreditu navíc</span>.
+          </p>
+
+          {annualLicense === 0 ? (
+            <div className="rounded-lg p-5" style={{ border: `1px dashed ${HAIR}`, color: INK_SOFT }}>
+              Nejdřív si nastav uživatele a balíčky v záložce Konfigurátor — tahle varianta z toho počítá roční hodnotu pro bonus.
+            </div>
+          ) : (
+          <div className="grid lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div className="rounded-lg p-5" style={{ background: PANEL, border: `1px solid ${HAIR}` }}>
+                <p className="text-xs font-medium uppercase tracking-wider mb-3" style={{ color: BRASS }}>Vaše pravidelné strhávání</p>
+                <div className="flex justify-between text-sm mb-1">
+                  <span style={{ color: INK_SOFT }}>Měsíčně (licence, balíčky, rozšíření)</span>
+                  <span className="font-num">{kc(monthlyTotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span style={{ color: INK_SOFT }}>Ročně</span>
+                  <span className="font-num">{kc(annualLicense)}</span>
+                </div>
+                <div className="flex justify-between text-sm pt-2 mt-2" style={{ borderTop: `1px solid ${HAIR}` }}>
+                  <span style={{ color: INK_SOFT }}>Denní strhávání z peněženky</span>
+                  <span className="font-num" style={{ color: TEAL }}>{kc2(dailyRate)} / den</span>
+                </div>
+                <p className="text-xs mt-2" style={{ color: INK_SOFT }}>
+                  Počítáno jako roční částka ÷ 365, takže je stejné každý měsíc bez ohledu na počet dní.
+                </p>
+              </div>
+
+              <div className="rounded-lg p-5" style={{ background: PANEL, border: `1px solid ${HAIR}` }}>
+                <p className="text-xs font-medium uppercase tracking-wider mb-3" style={{ color: BRASS }}>Dobití peněženky</p>
+                <div className="flex gap-2 mb-3">
+                  <input
+                    type="number"
+                    min={0}
+                    value={topUpAmount || ""}
+                    placeholder="0"
+                    onChange={(e) => setTopUpAmount(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="flex-1 rounded px-3 py-2 font-num text-sm focus:outline-none focus-visible:ring-2"
+                    style={{ border: `1.5px solid ${HAIR}`, background: PAPER, color: INK, ["--tw-ring-color"]: TEAL }}
+                  />
+                  <span className="self-center text-sm" style={{ color: INK_SOFT }}>Kč</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTopUpAmount(Math.ceil(annualLicense))}
+                  className="text-xs px-3 py-1.5 rounded focus:outline-none"
+                  style={{ border: `1.5px solid ${TEAL}`, color: TEAL }}
+                >
+                  Nabít na celý rok ({kc(annualLicense)}) → získat 20 % navíc
+                </button>
+
+                <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${HAIR}` }}>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm" style={{ color: INK_SOFT }}>Bonus</span>
+                    <span
+                      className="text-xs font-medium px-2 py-0.5 rounded-full"
+                      style={{
+                        background: walletBonusEligible ? `${TEAL}1A` : `${HAIR}80`,
+                        color: walletBonusEligible ? TEAL : INK_SOFT,
+                      }}
+                    >
+                      {walletBonusEligible ? "+20 % kreditu" : "bez bonusu"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span style={{ color: INK_SOFT }}>Nabito</span>
+                    <span className="font-num">{kc2(topUpAmount)}</span>
+                  </div>
+                  {walletBonusEligible && (
+                    <div className="flex justify-between text-sm">
+                      <span style={{ color: INK_SOFT }}>Bonus kredit</span>
+                      <span className="font-num" style={{ color: TEAL }}>+{kc2(walletBonusValue)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-baseline pt-2 mt-2" style={{ borderTop: `1px solid ${HAIR}` }}>
+                    <span className="font-medium">Připsáno na peněženku</span>
+                    <span className="font-num font-medium text-lg">{kc2(walletCredited)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-lg p-4" style={{ background: INK }}>
+                <p className="font-num text-xs uppercase tracking-widest mb-1" style={{ color: BRASS }}>Doklad pro klienta</p>
+                <div className="flex justify-between items-center mt-2 pt-2" style={{ borderTop: `1px solid #ffffff22` }}>
+                  <span className="text-sm" style={{ color: "#C9CDD6" }}>Dobití kreditu</span>
+                  <span className="font-num" style={{ color: PAPER }}>{kc2(topUpAmount)} + DPH</span>
+                </div>
+                <p className="text-xs mt-2" style={{ color: "#8B93A3" }}>
+                  Jediná položka na faktuře — žádné rozepisování licence, balíčků a spotřeby.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="rounded-lg p-5" style={{ background: PANEL, border: `1px solid ${HAIR}` }}>
+                <p className="text-xs font-medium uppercase tracking-wider mb-3" style={{ color: BRASS }}>Jak dlouho vydrží</p>
+                <div className="flex justify-between text-sm mb-1">
+                  <span style={{ color: INK_SOFT }}>Jen licence ({kc2(dailyRate)}/den)</span>
+                  <span className="font-num">{runwayLicenseOnly} dní (~{(runwayLicenseOnly / 30.4).toFixed(1)} měs.)</span>
+                </div>
+                {monthlyCreditSpend > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span style={{ color: INK_SOFT }}>S vaší spotřebou z Ročního kalkulátoru</span>
+                    <span className="font-num">{runwayWithSpend} dní (~{(runwayWithSpend / 30.4).toFixed(1)} měs.)</span>
+                  </div>
+                )}
+                {monthlyCreditSpend === 0 && (
+                  <p className="text-xs mt-2" style={{ color: INK_SOFT }}>
+                    Nastav objemy v záložce Roční kalkulátor a uvidíš tu i odhad s reálnou spotřebou.
+                  </p>
+                )}
+              </div>
+
+              {walletBonusEligible && (
+                <div
+                  className="rounded-lg p-5"
+                  style={{ background: bonusCoversSpend ? `${TEAL}0D` : `${BRASS}0D`, border: `1px solid ${bonusCoversSpend ? TEAL : BRASS}55` }}
+                >
+                  <p className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: bonusCoversSpend ? TEAL : BRASS }}>
+                    {bonusCoversSpend ? "Spotřeba pokryta bonusem" : "Bonus pokrývá část spotřeby"}
+                  </p>
+                  <p className="text-sm" style={{ color: INK_SOFT }}>
+                    Bonus za roční dobití je <span className="font-num">{kc2(walletBonusValue)}</span>.
+                    {annualCreditSpend > 0
+                      ? <> Vaše odhadovaná roční spotřeba z kreditového ceníku je <span className="font-num">{kc(annualCreditSpend)}</span>.</>
+                      : " Zatím jsi nezadal odhad spotřeby v Ročním kalkulátoru."}
+                    {bonusCoversSpend
+                      ? " Bonus ji celou pokryje — fakticky tak máte spotřebu v ceně licence."
+                      : annualCreditSpend > 0
+                        ? " Bonus ji pokryje jen částečně, zbytek se strhává navíc."
+                        : ""}
+                  </p>
+                </div>
+              )}
+
+              <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${HAIR}` }}>
+                <div className="px-4 py-2.5" style={{ background: INK }}>
+                  <p className="text-xs font-medium uppercase tracking-wider" style={{ color: BRASS }}>Ukázka výpisu čerpání (interní kategorizace)</p>
+                </div>
+                {[
+                  { label: "Pravidelné strhávání — licence", note: "Daily charge", value: -dailyRate },
+                  { label: "Spotřební čerpání — BankID identifikace", note: "Kredit", value: -49 },
+                  { label: "Spotřební čerpání — AI asistent", note: "Kredit", value: -6 },
+                  { label: "Pravidelné strhávání — licence", note: "Daily charge", value: -dailyRate },
+                ].map((row, i) => (
+                  <div
+                    key={i}
+                    className="px-4 py-2 flex items-center justify-between text-sm"
+                    style={{ background: i % 2 === 0 ? PANEL : "transparent", borderTop: `1px solid ${HAIR}` }}
+                  >
+                    <div>
+                      <p>{row.label}</p>
+                      <p className="text-xs" style={{ color: INK_SOFT }}>{row.note}</p>
+                    </div>
+                    <span className="font-num" style={{ color: INK_SOFT }}>{kc2(row.value)}</span>
+                  </div>
+                ))}
+                <p className="text-xs px-4 py-2.5" style={{ color: INK_SOFT, borderTop: `1px solid ${HAIR}` }}>
+                  Klient vidí jen jednu peněženku, ale každá položka v interním výpisu je značená kategorií — pro vaše účetnictví, marži a DPH zůstává rozlišení zachované.
+                </p>
+              </div>
+            </div>
+          </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }
