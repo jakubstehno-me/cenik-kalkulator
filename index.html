@@ -116,37 +116,67 @@ const INCLUDED = [
   "Auditní stopa a přístup k archivovaným dokumentům",
 ];
 
-const CREDIT_ITEMS = [
-  { name: "Zaručený elektronický podpis (ZEP)", price: "15 Kč" },
-  { name: "Kvalifikovaný elektronický podpis (KEP)", price: "25 Kč" },
-  { name: "Ověření totožnosti přes BankID", price: "49 Kč" },
-  { name: "PEP / sankční kontrola — mezinárodní", price: "19 Kč" },
-  { name: "PEP / sankční kontrola — ČR", price: "22 Kč" },
-  { name: "Exekuční kontrola ČR", price: "49 Kč" },
-  { name: "Exekuční kontrola SK", price: "79 Kč" },
-  { name: "Ztracený / odcizený doklad", price: "5 Kč" },
-  { name: "Výpis z rejstříku trestů ČR (vyžaduje souhlas prověřované osoby)", price: "49 Kč" },
-  { name: "SOLUS — registr dlužníků (vyžaduje souhlas)", price: "39 Kč" },
-  { name: "Bankovní/nebankovní registr klientských informací (BRKI/NRKI)", price: "59 Kč" },
-  { name: "Ověření trvalé adresy na obecním úřadě", price: "59 Kč" },
-  { name: "Registr dlužníků UA (komerční agregátor)", price: "89 Kč" },
-  { name: "Komerční credit scoring OSVČ (CRIF/Bisnode/Coface)", price: "79 Kč" },
-  { name: "Potvrzení o bezdlužnosti — ČSSZ (vyžaduje souhlas, úřední lhůta až 30 dní)", price: "49 Kč" },
-  { name: "Potvrzení o bezdlužnosti — zdravotní pojišťovna (vyžaduje souhlas)", price: "39 Kč" },
-  { name: "Mezinárodní B2B databáze (Dun & Bradstreet)", price: "99 Kč" },
-  { name: "Komerční credit scoring firmy (CRIF/Bisnode/Coface)", price: "99 Kč" },
-  { name: "Výpis ze skutečných majitelů — ESM (vyžaduje oprávněný zájem / AML přístup)", price: "149 Kč" },
-  { name: "Katastr nemovitostí — list vlastnictví (LV)", price: "100 Kč" },
-  { name: "Informace o parcele/budově/jednotce (WSDP)", price: "79 Kč" },
-  { name: "Přehled vlastnictví — celostátní pro subjekt (WSDP)", price: "149 Kč" },
-  { name: "Sbírka listin / nabývací tituly", price: "89 Kč" },
-  { name: "Cenové údaje (kupní ceny z KN)", price: "89 Kč" },
-  { name: "Vyjádření o existenci sítí (orchestrace, zákonná lhůta)", price: "99 Kč" },
-  { name: "Odhad tržní ceny nemovitosti (AVM)", price: "149 Kč" },
-  { name: "AI asistent (generování / review dokumentu)", price: "1 Kč / 1 000 tokenů" },
-  { name: "Archivace dokumentu — časové razítko + certifikát (jednorázově při uložení)", price: "4 Kč / dokument" },
-  { name: "Obnova archivní platnosti — re-timestamping před expirací certifikátu (automaticky, ročně)", price: "1 Kč / dokument / rok" },
-  { name: "Navýšení úložiště nad 10 GB", price: "79 Kč / 50 GB / měs" },
+const CREDIT_CATEGORIES = [
+  {
+    name: "Podpis a identifikace",
+    note: null,
+    items: [
+      { name: "Zaručený elektronický podpis (ZEP)", price: "15 Kč" },
+      { name: "Kvalifikovaný elektronický podpis (KEP)", price: "25 Kč" },
+      { name: "Ověření totožnosti přes BankID", price: "49 Kč" },
+    ],
+  },
+  {
+    name: "Screening osob a OSVČ",
+    note: null,
+    items: [
+      { name: "PEP / sankční kontrola — mezinárodní", price: "19 Kč" },
+      { name: "PEP / sankční kontrola — ČR", price: "22 Kč" },
+      { name: "Exekuční kontrola ČR", price: "49 Kč" },
+      { name: "Exekuční kontrola SK", price: "79 Kč" },
+      { name: "Ztracený / odcizený doklad", price: "5 Kč" },
+      { name: "Výpis z rejstříku trestů ČR (vyžaduje souhlas prověřované osoby)", price: "49 Kč" },
+      { name: "SOLUS — registr dlužníků (vyžaduje souhlas)", price: "39 Kč" },
+      { name: "Bankovní/nebankovní registr klientských informací (BRKI/NRKI)", price: "59 Kč" },
+      { name: "Ověření trvalé adresy na obecním úřadě", price: "59 Kč" },
+      { name: "Registr dlužníků UA (komerční agregátor)", price: "89 Kč" },
+      { name: "Komerční credit scoring OSVČ (CRIF/Bisnode/Coface)", price: "79 Kč" },
+      { name: "Potvrzení o bezdlužnosti — ČSSZ (vyžaduje souhlas, úřední lhůta až 30 dní)", price: "49 Kč" },
+      { name: "Potvrzení o bezdlužnosti — zdravotní pojišťovna (vyžaduje souhlas)", price: "39 Kč" },
+    ],
+  },
+  {
+    name: "Screening firem",
+    note: null,
+    items: [
+      { name: "Mezinárodní B2B databáze (Dun & Bradstreet)", price: "99 Kč" },
+      { name: "Komerční credit scoring firmy (CRIF/Bisnode/Coface)", price: "99 Kč" },
+      { name: "Výpis ze skutečných majitelů — ESM (vyžaduje oprávněný zájem / AML přístup)", price: "149 Kč" },
+    ],
+  },
+  {
+    name: "Nemovitosti",
+    note: "Ověřené výstupy s razítkem přes WSDP — existence check (vlastní/nevlastní) je v plánu zdarma.",
+    items: [
+      { name: "Katastr nemovitostí — list vlastnictví (LV)", price: "100 Kč" },
+      { name: "Informace o parcele/budově/jednotce (WSDP)", price: "79 Kč" },
+      { name: "Přehled vlastnictví — celostátní pro subjekt (WSDP)", price: "149 Kč" },
+      { name: "Sbírka listin / nabývací tituly", price: "89 Kč" },
+      { name: "Cenové údaje (kupní ceny z KN)", price: "89 Kč" },
+      { name: "Vyjádření o existenci sítí (orchestrace, zákonná lhůta)", price: "99 Kč" },
+      { name: "Odhad tržní ceny nemovitosti (AVM)", price: "149 Kč" },
+    ],
+  },
+  {
+    name: "AI a dokumenty",
+    note: null,
+    items: [
+      { name: "AI asistent (generování / review dokumentu)", price: "1 Kč / 1 000 tokenů" },
+      { name: "Archivace dokumentu — časové razítko + certifikát (jednorázově při uložení)", price: "4 Kč / dokument" },
+      { name: "Obnova archivní platnosti — re-timestamping před expirací certifikátu (automaticky, ročně)", price: "1 Kč / dokument / rok" },
+      { name: "Navýšení úložiště nad 10 GB", price: "79 Kč / 50 GB / měs" },
+    ],
+  },
 ];
 
 const PERSON_CHECK_TIERS = [
@@ -181,7 +211,7 @@ const PERSON_CHECK_TIERS = [
   {
     key: "rozsirena",
     name: "Rozšířená kompletní",
-    price: 449,
+    price: 369,
     alacarte: 469,
     note: "Vše z Kompletní + jednorázový kredit za:",
     items: [
@@ -332,6 +362,154 @@ const PROPERTY_CHECK_TIERS = [
   },
 ];
 
+const CROSSSELL_RULES = [
+  {
+    name: "Mezi typy subjektů (FO / OSVČ / firma / nemovitost)",
+    rules: [
+      {
+        trigger: "FO → OSVČ: Základní prověrka FO najde aktivní/historické živnostenské oprávnění v RŽP",
+        app: "Banner přímo ve výsledku: \"Tato osoba má živnostenské oprávnění — rozšířit na OSVČ prověrku?\" s cenou Kompletní/Rozšířené.",
+        email: "Neposílá se — nález se řeší v moment prohlížení výsledku, ne dodatečně.",
+      },
+      {
+        trigger: "OSVČ → FO: kdykoliv běží OSVČ prověrka",
+        app: "Stálá nabídka (ne podmíněná nálezem) doplnit FO-specifické položky mimo OSVČ bundl (ztracený doklad, dlužníci UA, adresa).",
+        email: "Souhrn po dokončení prověrky s odkazem na doplnění.",
+      },
+      {
+        trigger: "Firma → FO: Základní prověrka firmy vrátí seznam statutárů/společníků z OR",
+        app: "U každé osoby zvlášť ikona/odkaz \"prověřit jako OSVČ\", pokud má RŽP nález — ne hromadně pro všechny.",
+        email: "Neposílá se — řeší se v UI výsledku.",
+      },
+      {
+        trigger: "Síťové rozšíření: statutár/společník je evidován i u jiných subjektů v OR",
+        app: "Sekce \"Propojené subjekty\" pod výsledkem s počtem nalezených a tlačítkem rozšířit prověrku rekurzivně.",
+        email: "Týdenní souhrn pro probíhající hloubkové prověrky s nově nalezenými propojeními.",
+      },
+      {
+        trigger: "FO/OSVČ/Firma → Nemovitost: WSDP existence check (zdarma) najde vlastnictví",
+        app: "Badge \"vlastní N nemovitostí\" přímo u výsledku + tlačítko stáhnout Kompletní/Rozšířenou prověrku nemovitosti.",
+        email: "Neposílá se — okamžitý nález v UI.",
+      },
+      {
+        trigger: "Nemovitost → vlastník: po stažení LV je známa identita vlastníka",
+        app: "Tlačítko \"prověřit vlastníka\" přímo ve výpisu nemovitosti, předvyplní typ subjektu podle FO/IČO.",
+        email: "Neposílá se.",
+      },
+    ],
+  },
+  {
+    name: "Free → placený plán",
+    rules: [
+      {
+        trigger: "Free plán dosáhl měsíčního limitu položky (podpis, AML, screening, dokument)",
+        app: "Blokující modal při další akci s přehledem co limit obsahuje a cenou nejbližšího plánu.",
+        email: "Den dosažení limitu: \"Vyčerpali jste měsíční limit X\" s CTA na upgrade.",
+      },
+      {
+        trigger: "Free uživatel zkusí kreditovou funkci (KYC, BankID, exekuce, KEP)",
+        app: "Okamžitý upsell modal — \"tahle funkce vyžaduje placený plán + kredit\", přímý odkaz na dobití.",
+        email: "Neposílá se — řeší se v moment pokusu.",
+      },
+    ],
+  },
+  {
+    name: "Kredit — docházející zůstatek",
+    rules: [
+      {
+        trigger: "Zůstatek peněženky klesne pod 20 % průměrné měsíční spotřeby",
+        app: "Notifikační zvonek + banner v hlavičce appky s částkou a odhadem počtu dní do nuly.",
+        email: "\"Kredit dochází\" s návrhem dobít na nejbližší bonusový práh a kalkulací úspory.",
+      },
+      {
+        trigger: "Zůstatek = 0, akce se nepovedla kvůli nedostatku kreditu",
+        app: "Blokující modal přímo v místě selhání s tlačítkem okamžité dobití (kartou).",
+        email: "\"Akce se nepovedla — kredit byl vyčerpán\" se shrnutím, co čeká na dokončení.",
+      },
+      {
+        trigger: "3+ po sobě jdoucí dobití stejné nízké částky bez dosažení bonusového prahu",
+        app: "Při dalším dobíjení přednastavit vyšší částku s vypočtenou úsporou oproti dosavadnímu vzorci.",
+        email: "Měsíční souhrn: \"Při vyšším dobití byste za poslední 3 měsíce ušetřili X Kč.\"",
+      },
+    ],
+  },
+  {
+    name: "Balíčky dokumentů",
+    rules: [
+      {
+        trigger: "Uživatel v Lehkém přístupu opakovaně narazí na zámek balíčkové funkce",
+        app: "In-app prompt po 2.–3. pokusu: \"přidejte balíček X pro tohoto uživatele\" s cenou.",
+        email: "Po 5 pokusech za měsíc: souhrn s návrhem konkrétního balíčku.",
+      },
+      {
+        trigger: "Zákazník s balíčkem Reality opakovaně generuje dokumenty typické pro HR",
+        app: "Doporučující banner v appce: \"klienti s podobným použitím často přidávají i HR balíček\".",
+        email: "Měsíční souhrn využití s doporučením balíčku.",
+      },
+      {
+        trigger: "Uživatel v Základ úrovni balíčku opakovaně naráží na limitaci, kterou řeší Full",
+        app: "In-app prompt přímo v místě limitace s cenou příplatku na Full pro celý balíček.",
+        email: "Neposílá se — řeší se v moment limitace.",
+      },
+    ],
+  },
+  {
+    name: "Prověrky — uvnitř stejného typu subjektu",
+    rules: [
+      {
+        trigger: "Základní prověrka (zdarma) vrátí nález ve veřejném rejstříku (insolvence, sankce)",
+        app: "Zvýraznění nálezu + okamžitá nabídka Kompletní/Rozšířené prověrky s vysvětlením, co navíc ukáže.",
+        email: "Shrnutí výsledku prověrky s CTA na rozšíření, pokud nebylo využito ihned.",
+      },
+      {
+        trigger: "Zákazník opakovaně kupuje stejné položky à la carte místo bundlu",
+        app: "Po 2. nákupu stejné kombinace položek nabídnout přechod na odpovídající bundl.",
+        email: "Měsíční souhrn: \"Za poslední měsíc jste mohli ušetřit X Kč přechodem na balíček.\"",
+      },
+    ],
+  },
+  {
+    name: "Enterprise a whitelabel",
+    rules: [
+      {
+        trigger: "Účet přesáhne práh počtu uživatelů (např. 10)",
+        app: "In-app nabídka SSO v nastavení účtu s vysvětlením přínosu pro správu přístupů.",
+        email: "Jednorázový e-mail při překročení prahu.",
+      },
+      {
+        trigger: "Opakované support tickety ohledně brandingu nebo vlastní domény",
+        app: "Nabídka whitelabel tieru přímo v odpovědi supportu, ne jen v appce.",
+        email: "Po 2. ticketu na stejné téma — nabídka s odkazem na Basic/Full whitelabel.",
+      },
+    ],
+  },
+  {
+    name: "Roční platba a konverze na Vše kredit",
+    rules: [
+      {
+        trigger: "3+ měsíce nepřerušené měsíční platby",
+        app: "Banner v Konfigurátoru: \"přejděte na roční platbu a ušetřete 2 měsíce\" s přepočtem konkrétní částky.",
+        email: "Jednorázová nabídka po 3. měsíci, zopakovat po 6. pokud nereaguje.",
+      },
+      {
+        trigger: "Vysoká a stabilní měsíční spotřeba kreditu po dobu 2+ měsíců",
+        app: "Nabídka přechodu na variantu Vše kredit s vyčíslením ročního bonusu 20 % na konkrétních číslech účtu.",
+        email: "Personalizovaný e-mail s konkrétní kalkulací úspory na základě historie spotřeby.",
+      },
+    ],
+  },
+  {
+    name: "Re-engagement",
+    rules: [
+      {
+        trigger: "Žádná kreditová aktivita 60+ dní",
+        app: "Neaplikuje se — uživatel appku neotevírá.",
+        email: "\"Co jste mohli zmeškat\" — přehled nových funkcí + jednorázový bonus na dobití za návrat.",
+      },
+    ],
+  },
+];
+
 const SUPPORT_TIERS = [
   { key: "standard", name: "Standard", desc: "Chatbot a e-mail podpora v pracovní době.", price: 0 },
   { key: "plus", name: "Plus", desc: "Živý chat v aplikaci + e-mail, odpověď do 4 hodin.", price: 990 },
@@ -472,15 +650,27 @@ function Tile({ active, onClick, name, desc, price, accent = TEAL }) {
 function CheckTierGrid({ tiers }) {
   return (
     <div className="grid md:grid-cols-3 gap-3">
-      {tiers.map((tier) => {
+      {tiers.map((tier, idx) => {
         const savings = tier.alacarte - tier.price;
+        const recommended = idx === 1;
         return (
           <div
             key={tier.key}
-            className="rounded-lg p-4 flex flex-col"
-            style={{ background: PANEL, border: `1px solid ${HAIR}` }}
+            className="rounded-lg p-4 flex flex-col relative"
+            style={{
+              background: recommended ? `${BRASS}0D` : PANEL,
+              border: `1.5px solid ${recommended ? BRASS : HAIR}`,
+            }}
           >
-            <p className="font-display text-base">{tier.name}</p>
+            {recommended && (
+              <span
+                className="absolute -top-2.5 left-3 text-xs font-medium px-2 py-0.5 rounded-full"
+                style={{ background: BRASS, color: PAPER }}
+              >
+                Doporučujeme
+              </span>
+            )}
+            <p className="font-display text-base mt-1">{tier.name}</p>
             <div className="flex items-baseline gap-2 mt-1 mb-1">
               <span className="font-num text-lg font-medium">
                 {tier.price === 0 ? "0 Kč" : `${tier.price} Kč`}
@@ -614,8 +804,16 @@ function PricingCalculator() {
             Vyberte balíčky, uživatele a rozšíření — souhrn se chová jako návrh smlouvy
             a počítá se v reálném čase.
           </p>
-          <div className="mt-6 flex gap-2">
-            {[{ key: "config", label: "Konfigurátor" }, { key: "compare", label: "Srovnání plánů" }, { key: "annual", label: "Roční kalkulátor" }, { key: "wallet", label: "Varianta: Vše kredit" }].map((t) => (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {[
+              { key: "config", label: "Konfigurátor" },
+              { key: "creditlist", label: "Kreditový ceník" },
+              { key: "checks", label: "Prověrky" },
+              { key: "crosssell", label: "Cross-sell & upsell" },
+              { key: "compare", label: "Srovnání plánů" },
+              { key: "annual", label: "Roční kalkulátor" },
+              { key: "wallet", label: "Varianta: Vše kredit" },
+            ].map((t) => (
               <button
                 key={t.key}
                 type="button"
@@ -972,37 +1170,63 @@ function PricingCalculator() {
           </div>
         </aside>
       </main>
+      </>
+      )}
 
-      <section className="max-w-5xl mx-auto px-6 sm:px-10 pb-16">
+      {tab === "creditlist" && (
+      <section className="max-w-5xl mx-auto px-6 sm:px-10 py-10 pb-16">
         <div className="flex items-center gap-2 mb-3">
           <Receipt size={16} style={{ color: TEAL }} />
-          <h2 className="font-display text-xl">Kreditový ceník</h2>
+          <h2 className="font-display text-2xl">Kreditový ceník</h2>
         </div>
-        <p className="text-sm mb-4" style={{ color: INK_SOFT }}>
-          Položky, které nakupujeme od třetích stran — vždy s reálným nákladem, účtuje se kredit.
+        <p className="text-sm mb-8 max-w-2xl" style={{ color: INK_SOFT }}>
+          Položky, které nakupujeme od třetích stran, nebo dražší úrovně vlastních funkcí — vždy
+          s reálným nákladem, účtuje se kredit. Stejné položky jdou koupit i v balíčku — viz
+          záložka Prověrky.
         </p>
-        <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${HAIR}`, background: PANEL }}>
-          {CREDIT_ITEMS.map((c, i) => (
-            <div
-              key={c.name}
-              className="flex items-center justify-between px-4 py-2.5 text-sm"
-              style={{ borderTop: i === 0 ? "none" : `1px solid ${HAIR}` }}
-            >
-              <span>{c.name}</span>
-              <span className="font-num" style={{ color: TEAL }}>
-                {c.price}
-              </span>
+        {CREDIT_CATEGORIES.map((cat) => (
+          <div key={cat.name} className="mb-8">
+            <h3 className="text-sm font-medium uppercase tracking-wider mb-2" style={{ color: BRASS }}>
+              {cat.name}
+            </h3>
+            {cat.note && (
+              <p className="text-xs mb-2" style={{ color: INK_SOFT }}>{cat.note}</p>
+            )}
+            <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${HAIR}`, background: PANEL }}>
+              {cat.items.map((c, i) => (
+                <div
+                  key={c.name}
+                  className="flex items-center justify-between gap-4 px-4 py-2.5 text-sm"
+                  style={{ borderTop: i === 0 ? "none" : `1px solid ${HAIR}` }}
+                >
+                  <span>{c.name}</span>
+                  <span className="font-num shrink-0" style={{ color: TEAL }}>
+                    {c.price}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
         <p className="text-xs mt-4 italic" style={{ color: INK_SOFT }}>
           Ceny u balíčků, lehkého přístupu, whitelabelu, enterprise rozšíření a vyšších úrovní
           podpisu jsou ilustrativní — část kreditového ceníku odpovídá reálnému housefly.cz/cenik.
           Rozšíření aplikace jsou nově v základu, bez příplatku.
         </p>
+      </section>
+      )}
 
-        <div className="mt-10">
-          <h2 className="font-display text-xl mb-1">Prověření osoby — balíčky</h2>
+      {tab === "checks" && (
+      <section className="max-w-5xl mx-auto px-6 sm:px-10 py-10 pb-16">
+        <h2 className="font-display text-2xl mb-1">Prověrky — balíčky</h2>
+        <p className="text-sm mb-8 max-w-2xl" style={{ color: INK_SOFT }}>
+          Stejné položky jako v kreditovém ceníku, jen jako jednorázový balíček na jeden
+          prověřovaný subjekt — vždy s výhodnější cenou než nákup položek zvlášť, a čím vyšší
+          úroveň, tím vyšší úspora v součtu.
+        </p>
+
+        <div className="mb-10">
+          <h2 className="font-display text-xl mb-1">Prověření osoby</h2>
           <p className="text-sm mb-4" style={{ color: INK_SOFT }}>
             Stejné položky jako v kreditovém ceníku výše, jen jako jednorázový balíček na jednu
             prověřovanou osobu — s výhodnější cenou než nákup položek zvlášť.
@@ -1010,8 +1234,8 @@ function PricingCalculator() {
           <CheckTierGrid tiers={PERSON_CHECK_TIERS} />
         </div>
 
-        <div className="mt-10">
-          <h2 className="font-display text-xl mb-1">Prověření OSVČ — balíčky</h2>
+        <div className="mb-10">
+          <h2 className="font-display text-xl mb-1">Prověření OSVČ</h2>
           <p className="text-sm mb-4" style={{ color: INK_SOFT }}>
             Stejná logika, jen zaměřená na podnikající fyzickou osobu — registr plátců DPH,
             živnostenské oprávnění a obchodní rejstřík navíc oproti běžné prověrce osoby.
@@ -1021,18 +1245,18 @@ function PricingCalculator() {
           <CheckTierGrid tiers={BUSINESS_CHECK_TIERS} />
         </div>
 
-        <div className="mt-10">
-          <h2 className="font-display text-xl mb-1">Prověření firmy — balíčky</h2>
+        <div className="mb-10">
+          <h2 className="font-display text-xl mb-1">Prověření firmy</h2>
           <p className="text-sm mb-4" style={{ color: INK_SOFT }}>
             Pro právnické osoby — obchodní rejstřík, registr plátců DPH a sbírka listin v základu.
             Výpis ze skutečných majitelů je od 12/2025 právně omezený, ne prostý lookup —
-            viz poznámka v kreditovém ceníku výše.
+            viz poznámka v kreditovém ceníku.
           </p>
           <CheckTierGrid tiers={COMPANY_CHECK_TIERS} />
         </div>
 
-        <div className="mt-10">
-          <h2 className="font-display text-xl mb-1">Prověření nemovitosti — balíčky</h2>
+        <div>
+          <h2 className="font-display text-xl mb-1">Prověření nemovitosti</h2>
           <p className="text-sm mb-4" style={{ color: INK_SOFT }}>
             Pro nemovitost nebo pozemek jako takový — bonita, povodně, sítě a občanská vybavenost
             v základu. WSDP existence check (vlastní/nevlastní) je zdarma, ověřený výpis s razítkem
@@ -1040,62 +1264,45 @@ function PricingCalculator() {
           </p>
           <CheckTierGrid tiers={PROPERTY_CHECK_TIERS} />
         </div>
-
-        <div
-          className="mt-10 rounded-lg p-5"
-          style={{ background: `${BRASS}0D`, border: `1px dashed ${BRASS}66` }}
-        >
-          <p className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: BRASS }}>
-            Interní poznámka — cross-sell mezi FO, OSVČ, firmou a nemovitostí (není položka ceníku)
-          </p>
-          <ul className="space-y-2 text-sm" style={{ color: INK_SOFT }}>
-            <li>
-              <span style={{ color: INK, fontWeight: 500 }}>FO → OSVČ (datově podmíněné):</span>{" "}
-              Základní prověrka FO už dnes obsahuje lookup do živnostenského rejstříku zdarma. Pokud
-              vrátí nález (aktivní i historické živnostenské oprávnění), automaticky nabídnout
-              rozšíření na Kompletní/Rozšířenou OSVČ prověrku — trigger je výsledek RŽP dotazu, ne
-              ruční rozhodnutí prodejce.
-            </li>
-            <li>
-              <span style={{ color: INK, fontWeight: 500 }}>OSVČ → FO (stálá nabídka, ne nález):</span>{" "}
-              U OSVČ prověrky je už předem jasné, že jde o fyzickou osobu — tady není co objevovat.
-              Místo triggeru jde o standing nabídku doplnit položky, které OSVČ bundly neřeší
-              (ztracený doklad, registr dlužníků UA, ověření trvalé adresy).
-            </li>
-            <li>
-              <span style={{ color: INK, fontWeight: 500 }}>Firma → FO statutárů/společníků → OSVČ (vícestupňové, datově podmíněné):</span>{" "}
-              Základní prověrka firmy už dnes čte z OR seznam statutárních orgánů a společníků
-              zdarma. Pro každou z těchto osob spustit stejný RŽP lookup jako u FO → OSVČ — pokud
-              některá z nich má i vlastní živnostenské oprávnění, nabídnout rozšíření na OSVČ
-              prověrku jen pro tu konkrétní osobu, ne paušálně pro všechny.
-            </li>
-            <li>
-              <span style={{ color: INK, fontWeight: 500 }}>Síťové rozšíření na další subjekty a osoby (datově podmíněné, rekurzivní):</span>{" "}
-              Pokud je statutár nebo společník zjištěné firmy evidován v OR i u jiných subjektů
-              (běžně dostupné jako "ostatní vztahy osoby" v OR), nabídnout rozšíření prověrky na tyto
-              další firmy a osoby. Cena takového rozšíření se nesčítá do nového bundlu — je to
-              N × cena Základní/Kompletní/Rozšířené prověrky podle zvolené hloubky pro každý nově
-              přidaný subjekt/osobu, ne nová položka ceníku.
-            </li>
-            <li>
-              <span style={{ color: INK, fontWeight: 500 }}>FO/OSVČ/Firma → Nemovitost (datově podmíněné, přes WSDP):</span>{" "}
-              Při jakékoliv prověrce subjektu spustit zdarma WSDP existence check (ctiOS/zjednodušené
-              zadání) — zda subjekt v KN něco vlastní. Pokud ano, zobrazit počet nalezených nemovitostí
-              a nabídnout Kompletní/Rozšířenou prověrku nemovitosti pro vybrané nebo všechny z nich —
-              tím se stahuje placený výstup (LV, přehled vlastnictví) jen tam, kde existence checku
-              skutečně něco našel, ne naslepo.
-            </li>
-            <li>
-              <span style={{ color: INK, fontWeight: 500 }}>Nemovitost → vlastník (odvozené, ne primární požadavek):</span>{" "}
-              Opačný směr vyplývá ze stejných dat — LV obsahuje identitu vlastníka, takže po stažení
-              Kompletní prověrky nemovitosti lze nabídnout odpovídající FO/OSVČ/Firma prověrku přímo
-              na zjištěného vlastníka. Není to nic, co je potřeba zvlášť stavět — jen UX rozhodnutí,
-              jestli to nabízet automaticky.
-            </li>
-          </ul>
-        </div>
       </section>
-      </>
+      )}
+
+      {tab === "crosssell" && (
+      <section className="max-w-5xl mx-auto px-6 sm:px-10 py-10 pb-16">
+        <h2 className="font-display text-2xl mb-1">Cross-sell &amp; upsell</h2>
+        <p className="text-sm mb-8 max-w-2xl" style={{ color: INK_SOFT }}>
+          Interní přehled pravidel, ne položky ceníku. Trigger je vždy odvozený z dat, která už
+          máte zdarma — žádné pravidlo nestaví na placené položce jen proto, aby fungovalo.
+        </p>
+        {CROSSSELL_RULES.map((cat) => (
+          <div key={cat.name} className="mb-8">
+            <h3 className="text-sm font-medium uppercase tracking-wider mb-3" style={{ color: BRASS }}>
+              {cat.name}
+            </h3>
+            <div className="space-y-3">
+              {cat.rules.map((r, i) => (
+                <div
+                  key={i}
+                  className="rounded-lg p-4"
+                  style={{ background: PANEL, border: `1px solid ${HAIR}` }}
+                >
+                  <p className="text-sm font-medium mb-2" style={{ color: INK }}>{r.trigger}</p>
+                  <div className="grid sm:grid-cols-2 gap-3 text-xs">
+                    <div className="flex gap-2">
+                      <span className="shrink-0 px-1.5 py-0.5 rounded font-medium" style={{ background: `${TEAL}1A`, color: TEAL }}>app</span>
+                      <span style={{ color: INK_SOFT }}>{r.app}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="shrink-0 px-1.5 py-0.5 rounded font-medium" style={{ background: `${BRASS}1A`, color: BRASS }}>e-mail</span>
+                      <span style={{ color: INK_SOFT }}>{r.email}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
       )}
 
       {tab === "compare" && (
